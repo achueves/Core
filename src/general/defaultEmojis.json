@@ -1,0 +1,30 @@
+{
+	"numbers": {
+		"one": "\u0031\ufe0f\u20e3",
+		"two": "\u0032\ufe0f\u20e3",
+		"three": "\u0033\ufe0f\u20e3",
+		"four": "\u0034\ufe0f\u20e3",
+		"five": "\u0035\ufe0f\u20e3",
+		"six": "\u0036\ufe0f\u20e3",
+		"seven": "\u0037\ufe0f\u20e3",
+		"eight": "\u0038\ufe0f\u20e3",
+		"nine": "\u0039\ufe0f\u20e3",
+		"zero": "\u0030\ufe0f\u20e3"
+	},
+	"arrows": {
+		"right": "\u2b05\ufe0f",
+		"left": "\u27a1\ufe0f"
+	},
+	"stop": "\u23f9\ufe0f",
+	"dot": "\u25FD",
+	"heart": "\u2764\ufe0f",
+	"blueHeart": "\ud83d\udc99",
+	"wave": "\ud83d\udc4b",
+	"human": "\ud83d\ude4b\u200d\u2642\ufe0f",
+	"questionMark": "\u2754",
+	"circle": {
+		"green": "\ud83d\udfe2",
+		"yellow": "\ud83d\udfe1",
+		"red": "\ud83d\udd34"
+	}
+}

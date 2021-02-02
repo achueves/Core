@@ -1,0 +1,43 @@
+{
+  "name": "@uwu-codes/core",
+  "version": "1.0.0",
+  "description": "A core library for my bots.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "prepare": "rm -rf build && tsc && echo Build Finished",
+    "build": "npm run prepare"
+  },
+  "author": "Donovan_DMC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UWUCode/Core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/UWUCode/Core/issues"
+  },
+  "homepage": "https://github.com/UWUCode/Core#readme",
+  "dependencies": {
+    "@types/mongodb": "^3.6.3",
+    "@uwu-codes/discord-slash-commands": "^1.0.2",
+    "@uwu-codes/utils": "^1.0.3",
+    "deasync": "^0.1.21",
+    "dot-object": "^2.1.4",
+    "eris": "github:abalabahaha/eris#dev",
+    "fs-extra": "^9.1.0",
+    "json5": "^2.2.0",
+    "mongodb": "^3.6.3"
+  },
+  "devDependencies": {
+    "@types/deasync": "^0.1.1",
+    "@types/dot-object": "^2.1.2",
+    "@types/fs-extra": "^9.0.6",
+    "@types/json5": "^0.0.30",
+    "@types/node": "^14.14.22"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
