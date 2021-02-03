@@ -26,7 +26,7 @@ export default class ExtendedMessage<
 		value: string[];
 		keyValue: Record<string, string>;
 	};
-	constructor(msg: Eris.Message<Eris.TextableChannel>, client: C, slash?: boolean, slashInfo?: ExtendedMessage["slashInfo"]) {
+	constructor(msg: Eris.Message<Eris.TextableChannel>, client: C, slash?: boolean, slashInfo?: ExtendedMessage<C>["slashInfo"]) {
 		if (!("guild" in msg.channel)) return;
 		else {
 			super({
