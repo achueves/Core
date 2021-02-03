@@ -22,16 +22,16 @@ export default class Command<C extends CoreClient = CoreClient> {
 	donatorCooldown: number;
 	category: Category<C>;
 	hasSlashVariant: boolean;
-	run: (this: C, msg: ExtendedMessage, cmd: Command<C>) => Promise<any>;
+	run: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<any>;
 	// allow isn't used right now but it can be a bypass system in the future
 	overrides:
 		{
-			permissionError: (this: C, msg: ExtendedMessage, cmd: Command<C>, type: "user" | "bot", permissions: ErisPermissions[]) => Promise<OverrideReturn>;
-			invalidUsage: (this: C, msg: ExtendedMessage, cmd: Command<C>, err: CommandError<"ERR_INVALID_USAGE">) => Promise<OverrideReturn>;
-			help: (this: C, msg: ExtendedMessage, cmd: Command<C>) => Promise<OverrideReturn>;
-			cooldown: (this: C, msg: ExtendedMessage, cmd: Command<C>, time: number) => Promise<OverrideReturn>;
+			permissionError: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, type: "user" | "bot", permissions: ErisPermissions[]) => Promise<OverrideReturn>;
+			invalidUsage: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<"ERR_INVALID_USAGE", C>) => Promise<OverrideReturn>;
+			help: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn>;
+			cooldown: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, time: number) => Promise<OverrideReturn>;
 		} & {
-			[k in CommandRestrictions]: (this: C, msg: ExtendedMessage, cmd: Command<C>) => Promise<OverrideReturn>;
+			[k in CommandRestrictions]: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn>;
 		};
 	file: string;
 	constructor(triggers: ArrayOneOrMore<string>, file: string) {
@@ -73,44 +73,44 @@ export default class Command<C extends CoreClient = CoreClient> {
 		return `${path.dirname(this.file).replace(/build(\\|\/)/, "")}/${path.basename(this.file).replace(/.js/, ".ts")}`;
 	}
 
-	setTriggers(data: Command["triggers"]) {
+	setTriggers(data: Command<C>["triggers"]) {
 		if (!data) throw new TypeError("One or more triggers must be provided.");
 		this.triggers = data;
 		return this;
 	}
 
-	setBotPermissions(data: Command["permissions"]["bot"], data2?: Command["permissions"]["botUseful"]) {
+	setBotPermissions(data: Command<C>["permissions"]["bot"], data2?: Command<C>["permissions"]["botUseful"]) {
 		this.permissions.bot = data || [];
 		this.permissions.botUseful = data2 || [];
 		return this;
 	}
 
-	setUserPermissions(data: Command["permissions"]["user"]) {
+	setUserPermissions(data: Command<C>["permissions"]["user"]) {
 		this.permissions.user = data || [];
 		return this;
 	}
 
-	setPermissions(data: Command["permissions"]["bot"], data2: Command["permissions"]["botUseful"], data3: Command["permissions"]["user"]) {
+	setPermissions(data: Command<C>["permissions"]["bot"], data2: Command<C>["permissions"]["botUseful"], data3: Command<C>["permissions"]["user"]) {
 		this.setBotPermissions(data || this.permissions.bot, data2 || this.permissions.botUseful);
 		this.setUserPermissions(data3 || this.permissions.user);
 	}
 
-	setRestrictions(data: Command["restrictions"]) {
+	setRestrictions(data: Command<C>["restrictions"]) {
 		this.restrictions = data ?? [];
 		return this;
 	}
 
-	setUsage(data: Command["usage"]) {
+	setUsage(data: Command<C>["usage"]) {
 		this.usage = data;
 		return this;
 	}
 
-	setDescription(data: Command["description"]) {
+	setDescription(data: Command<C>["description"]) {
 		this.description = data;
 		return this;
 	}
 
-	setCooldown(data: Command["cooldown"], donatorSame = true) {
+	setCooldown(data: Command<C>["cooldown"], donatorSame = true) {
 		this.cooldown = data;
 		if (donatorSame) this.donatorCooldown = data;
 		return this;
@@ -131,12 +131,12 @@ export default class Command<C extends CoreClient = CoreClient> {
 		return this;
 	}
 
-	setOverride<K extends keyof Command["overrides"]>(type: K, override: Command<C>["overrides"][K]) {
+	setOverride<K extends keyof Command<C>["overrides"]>(type: K, override: Command<C>["overrides"][K]) {
 		(this.overrides[type] as any) = override;
 		return this;
 	}
 
-	runOverride<K extends keyof Command<C>["overrides"]>(type: K, client: C, ...args: Parameters<Command<C>["overrides"][K]>): ReturnType<Command["overrides"][K]> {
+	runOverride<K extends keyof Command<C>["overrides"]>(type: K, client: C, ...args: (Parameters<Command<C>["overrides"][K]>)): ReturnType<Command<C>["overrides"][K]> {
 		return (this.overrides[type] as any).call(client, ...args);
 	}
 

@@ -11,23 +11,21 @@ export default class Category<C extends CoreClient = CoreClient> {
 	description: string;
 	restrictions: CategoryRestrictions[];
 	file: string;
-	#cmds: Command<C>[];
+	commands: Command<C>[];
 	constructor(name: string, file: string) {
 		this.name = name;
 		this.displayName = "";
 		this.file = file;
-		this.#cmds = [];
+		this.commands = [];
 		this.description = "";
 		this.restrictions = [];
 
 	}
 
-	get commands() {
-		return [...this.#cmds];
-	}
 	get triggers(): string[] {
-		return this.#cmds.reduce((a, b) => a.concat(b.triggers), [] as string[]);
+		return this.commands.reduce((a, b) => a.concat(b.triggers), [] as string[]);
 	}
+
 	get tsFile() {
 		return `${path.dirname(this.file).replace(/build(\\|\/)/, "")}/${path.basename(this.file).replace(/.js/, ".ts")}`;
 	}
@@ -50,16 +48,16 @@ export default class Category<C extends CoreClient = CoreClient> {
 	addCommand(data: Command<C>) {
 		if (!data) throw new TypeError("Missing command.");
 		// I could do this differently but nah
-		for (const t of data.triggers) if (this.triggers.includes(t)) throw new TypeError(`Duplicate trigger "${t}" in command "${data.tsFile}" (duplicate: ${this.#cmds.find(c => c.triggers.includes(t))!.tsFile})`);
+		for (const t of data.triggers) if (this.triggers.includes(t)) throw new TypeError(`Duplicate trigger "${t}" in command "${data.tsFile}" (duplicate: ${this.commands.find(c => c.triggers.includes(t))!.tsFile})`);
 		data.setCategory(this);
-		this.#cmds.push(data);
+		this.commands.push(data);
 		return true;
 	}
 
 	removeCommand(data: Command<C> | string) {
-		if (typeof data === "string") data = this.#cmds.find(c => c.triggers.includes(data as string))!;
-		if (!data || !this.#cmds.includes(data)) return false;
-		this.#cmds.splice(this.#cmds.indexOf(data), 1);
+		if (typeof data === "string") data = this.commands.find(c => c.triggers.includes(data as string))!;
+		if (!data || !this.commands.includes(data)) return false;
+		this.commands.splice(this.commands.indexOf(data), 1);
 		return true;
 	}
 

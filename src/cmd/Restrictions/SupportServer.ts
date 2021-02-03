@@ -4,7 +4,7 @@ import Language from "../../general/Language";
 import CoreClient from "../../CoreClient";
 
 export const Label = "supportServer";
-export async function test(client: CoreClient, msg: ExtendedMessage, cmd: Command) {
+export async function test<C extends CoreClient = CoreClient>(client: C, msg: ExtendedMessage<C>, cmd: Command<C>) {
 	if (client.cnf === null) throw new TypeError("Client has not been initialized");
 	if (client.cnf.developers.includes(msg.author.id)) return true;
 	if (cmd.restrictions.includes("supportServer") && msg.channel.guild.id !== client.cnf.client.supportServerId) {
