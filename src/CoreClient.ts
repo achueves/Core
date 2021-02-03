@@ -1,6 +1,7 @@
 import { CommandHelper } from "@uwu-codes/discord-slash-commands";
 import Eris from "eris";
 import CommandHandler from "./cmd/CommandHandler";
+import db from "./db";
 import ClientEvent from "./general/ClientEvent";
 import MessageCollector from "./general/MessageCollector";
 import WebhookStore from "./general/WebhookStore";
@@ -34,6 +35,7 @@ export default abstract class CoreClient extends Eris.Client {
 		this.events = new Map();
 		this.col = new MessageCollector(this);
 		this.typing = new Map();
+		db.setClient(this);
 	}
 
 	async getUser(id: string) {
