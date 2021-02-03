@@ -9,6 +9,7 @@ export default abstract class GuildConfig {
 	settings: {
 		lang: Languages;
 	};
+	prefix: string[];
 	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>) {
 		this.id = id;
 		this.load.call(this, data);
