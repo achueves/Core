@@ -38,9 +38,8 @@ abstract class Database {
 	static get mdb() { return this.mongo.db(this.mainDB); }
 	static get connected() { return this.connection?.isConnected?.() ?? false; }
 
-	static getUser: (id: string) => Promise<UserConfig>;
-
-	static getGuild: (id: string) => Promise<GuildConfig>
+	static getUser: <UC extends UserConfig = UserConfig>(id: string) => Promise<UC>;
+	static getGuild: <GC extends GuildConfig = GuildConfig>(id: string) => Promise<GC>
 }
 
 const { mongo, mdb } = Database;
