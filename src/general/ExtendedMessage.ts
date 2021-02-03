@@ -75,4 +75,111 @@ export default class ExtendedMessage<
 		};
 		return true;
 	}
+
+
+	async getUserFromArgs(argPos = 0, useMentions = true, mentionPos = argPos): Promise<Eris.User | null> {
+		if (useMentions && this.mentionList.users[mentionPos]) return this.mentionList.users[mentionPos];
+		if (!this.args || !this.args[argPos]) return null;
+		const t = this.args[argPos].toLowerCase();
+
+		const username = this.client.users.find(u => u.username.toLowerCase() === t);
+		const tag = this.client.users.find(u => `${u.username}#${u.discriminator}`.toLowerCase() === t);
+		const [, a, b] = t.match(/(?:<@!?([0-9]{15,21})>|([0-9]{15,21}))/) ?? [];
+		const id = a || b ? await this.client.getUser(a || b).catch(err => null) : null;
+		return username || tag || id || null;
+	}
+
+	async getMemberFromArgs(argPos = 0, useMentions = true, mentionPos = argPos): Promise<Eris.Member | null> {
+		if (useMentions && this.mentionList.members[mentionPos]) return this.mentionList.members[mentionPos];
+		if (!this.args || !this.args[argPos]) return null;
+		const t = this.args[argPos].toLowerCase();
+
+		const username = this.channel.guild.members.find(m => m.username.toLowerCase() === t);
+		const tag = this.channel.guild.members.find(m => `${m.username}#${m.discriminator}`.toLowerCase() === t);
+		let id: Eris.Member | null = null;
+		if (/[0-9]{15,21}/.test(t)) {
+			id = this.channel.guild.members.find(m => m.id === this.args[argPos]) ?? null;
+			if (id === null) {
+				id = await this.channel.guild.getRESTMember(t).catch(err => null);
+				if (id) this.channel.guild.members.add(id);
+			}
+		}
+
+		return username || tag || id || null;
+	}
+
+	async getChannelFromArgs<T extends Eris.GuildChannel = Eris.TextChannel>(argPos = 0, useMentions = true, mentionPos = argPos): Promise<T | null> {
+		if (useMentions && this.mentionList.channels[mentionPos]) return this.mentionList.channels[mentionPos] as T;
+		if (!this.args || !this.args[argPos]) return null;
+		const t = this.args[argPos].toLowerCase();
+
+		const name = this.channel.guild.channels.find(c => c.name.toLowerCase() === t) as T;
+		let id: T | null = null;
+		if (/[0-9]{15,21}/.test(t)) {
+			id = this.channel.guild.channels.find(c => c.id === this.args[argPos]) as T ?? null;
+			if (id === null) id = await this.client.getRESTChannel(t).catch(err => null) as T;
+		}
+
+		return name || id || null;
+	}
+
+	async getRoleFromArgs(argPos = 0, useMentions = true, mentionPos = argPos): Promise<Eris.Role | null> {
+		if (useMentions && this.mentionList.roles[mentionPos]) return this.mentionList.roles[mentionPos];
+		if (!this.args || !this.args[argPos]) return null;
+		const t = this.args[argPos].toLowerCase();
+
+		const name = this.channel.guild.roles.find(r => r.name.toLowerCase() === t);
+		const id = /[0-9]{15,21}/.test(t) ? this.channel.guild.roles.find(r => r.id === this.args[argPos]) ?? null : null;
+
+		return name || id || null;
+	}
+
+	async getReplyText(content: Eris.MessageContent, type: "mention" | "quote" | "new" = "new", id?: string) {
+		if (!id) id = this.id;
+		switch (type) {
+			case "mention": {
+				if (typeof content === "string") content = {
+					content: `<@!${this.author.id}>, ${content}`
+				};
+				else content.content = `<@!${this.author.id}>${!content.content ? "" : `, ${content.content}`}`;
+				break;
+			}
+
+			case "quote": {
+				const m: Eris.Message | null = this.channel.messages.get(id) || await this.channel.getMessage(id).catch(err => null);
+				if (!id || m === null) throw new TypeError("Invalid message id provided.");
+				if (typeof content === "string") content = {
+					content: `> ${m.content}\n<@!${m.author.id}>, ${content}`
+				};
+				else content.content = `> ${m.content}\n<@!${m.author.id}>, ${content.content || ""}`;
+				break;
+			}
+
+			case "new": {
+				if (!id) throw new TypeError("Invalid message id provided.");
+				if (typeof content === "string") content = {
+					content
+				};
+				content.messageReferenceID = id;
+
+				break;
+			}
+		}
+
+		return content;
+	}
+
+	async reply(content: Eris.MessageContent, type?: "mention" | "quote" | "new") {
+
+		/* if (this.slash) {
+			if (type === "new") type = "mention";
+			const text = await this.getReplyText(content, type, this.id);
+			return this.client.h.createInteractionResponse(this.slashInfo.id, this.slashInfo.token, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE)
+		}
+		else { */
+		if (this.slash) return this.channel.createMessage(content);
+		const text = await this.getReplyText(content, type, this.id);
+		return this.channel.createMessage(text);
+		/* } */
+	}
 }
