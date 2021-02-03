@@ -18,14 +18,14 @@ interface ConfigLike {
 
 export default abstract class CoreClient extends Eris.Client {
 	abstract cnf: ConfigLike | null = null;
-	w: WebhookStore;
 	h: CommandHelper;
+	w: WebhookStore<this>;
 	cmd: CommandHandler<this>;
 	events: Map<string, {
 		handler: (...args: any[]) => void;
 		event: ClientEvent<CoreClient>;
 	}>;
-	col: MessageCollector;
+	col: MessageCollector<this>;
 	typing: Map<string, NodeJS.Timeout>;
 	constructor(token: string, options?: Eris.ClientOptions) {
 		super(token, options);
