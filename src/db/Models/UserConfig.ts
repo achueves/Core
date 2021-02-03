@@ -29,7 +29,7 @@ export default abstract class UserConfig {
 		return j;
 	}
 
-	async edit(data: ConfigEditTypes<UserConfig, "id">) {
+	async edit(data: ConfigEditTypes<this, "id">) {
 		await mdb.collection("users").findOneAndUpdate({
 			id: this.id
 		}, {

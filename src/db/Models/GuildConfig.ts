@@ -34,7 +34,7 @@ export default abstract class GuildConfig {
 		return j;
 	}
 
-	async edit(data: ConfigEditTypes<GuildConfig, "id">) {
+	async edit(data: ConfigEditTypes<this, "id">) {
 		await mdb.collection("guilds").findOneAndUpdate({
 			id: this.id
 		}, {
