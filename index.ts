@@ -12,7 +12,6 @@ import ExtraHandlers from "./src/cmd/ExtraHandlers";
 import GuildConfig from "./src/db/Models/GuildConfig";
 import UserConfig from "./src/db/Models/UserConfig";
 import Database from "./src/db";
-export * from "./src/db";
 import BotFunctions from "./src/general/BotFunctions";
 import ClientEvent from "./src/general/ClientEvent";
 import colors from "./src/general/colors.json";
