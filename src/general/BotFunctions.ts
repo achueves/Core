@@ -6,6 +6,10 @@ import * as https from "https";
 import defaultEmojis from "./defaultEmojis.json";
 import Discord from "../@types/Discord";
 import { Colors } from "./Constants";
+import { Category, Command } from "../..";
+import CoreClient from "../CoreClient";
+import * as fs from "fs-extra";
+import path from "path";
 
 export default class BotFunctions {
 	private constructor() {
@@ -123,5 +127,25 @@ export default class BotFunctions {
 		};
 		Object.keys(m).map(v => num = num.toString().replace(new RegExp(v.toString(), "g"), (m as any)[v]));
 		return num;
+	}
+
+	/**
+	 * Load commands in a directory into a category.
+	 *
+	 * @static
+	 * @param {string} dir - The directory to laod from.
+	 * @param {Category} cat - The category to add on to.
+	 * @memberof Internal
+	 * @example Internal.loadCommands("/opt/NPMBot/src/commands/developer", <Category>);
+	 */
+	static loadCommands<C extends CoreClient = CoreClient>(dir: string, cat: Category<C>) {
+		const ext = __filename.split(".").slice(-1)[0];
+		fs.readdirSync(dir).filter(f => !fs.lstatSync(`${dir}/${f}`).isDirectory() && f.endsWith(ext) && f !== `index.${ext}`).map(f => {
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			let c = require(`${dir}/${f}`);
+			if (c.default) c = c.default;
+			if (c instanceof Command) cat.addCommand(c);
+			else throw new TypeError(`Invalid command in file "${path.resolve(`${dir}/${f}`)}"`);
+		});
 	}
 }
