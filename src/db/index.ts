@@ -1,4 +1,4 @@
-import { MongoClient, Collection, MongoError, WithId, MongoClientOptions } from "mongodb";
+import { MongoClient, Collection, MongoClientOptions } from "mongodb";
 import UserConfig from "./Models/UserConfig";
 import GuildConfig from "./Models/GuildConfig";
 import { Timers } from "@uwu-codes/utils";

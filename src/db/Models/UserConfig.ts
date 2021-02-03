@@ -1,5 +1,4 @@
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
-import { Languages } from "../../general/Language";
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
 import { db, mdb } from "..";
 import { Utility } from "@uwu-codes/utils";
