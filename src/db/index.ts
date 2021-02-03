@@ -5,7 +5,7 @@ import { Timers } from "@uwu-codes/utils";
 import deasync from "deasync";
 import CoreClient from "../CoreClient";
 
-abstract class Database {
+abstract class Database<GC extends GuildConfig, UC extends UserConfig> {
 	private static mainDB: string;
 	static connection: MongoClient;
 	static client: CoreClient;
@@ -38,8 +38,8 @@ abstract class Database {
 	static get mdb() { return this.mongo.db(this.mainDB); }
 	static get connected() { return this.connection?.isConnected?.() ?? false; }
 
-	static getUser: <UC extends UserConfig = UserConfig>(id: string) => Promise<UC>;
-	static getGuild: <GC extends GuildConfig = GuildConfig>(id: string) => Promise<GC>
+	static getUser: (id: string) => Promise<UserConfig>;
+	static getGuild: (id: string) => Promise<GuildConfig>
 }
 
 const { mongo, mdb } = Database;
