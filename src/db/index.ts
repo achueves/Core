@@ -5,7 +5,7 @@ import { Timers } from "@uwu-codes/utils";
 import deasync from "deasync";
 import CoreClient from "../CoreClient";
 
-abstract class Database<GC extends GuildConfig, UC extends UserConfig> {
+abstract class Database {
 	private static mainDB: string;
 	static connection: MongoClient;
 	static client: CoreClient;
