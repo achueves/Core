@@ -1,4 +1,5 @@
 import Eris from "eris";
+import CoreClient from "../CoreClient";
 
 export default class MonkeyPatch {
 	static init() {
@@ -16,7 +17,7 @@ export default class MonkeyPatch {
 
 		this.apply(Eris.Guild.prototype, "me", {
 			get(this: Eris.Guild) {
-				return this.members.get(this._client.user.id);
+				return this.members.get((this as any)._client.user.id);
 			}
 		});
 
@@ -26,27 +27,15 @@ export default class MonkeyPatch {
 			}
 		});
 
-		this.apply(Eris.Client.prototype, "typing", {
-			value: {}
-		});
-
-		const per = 7;
 		this.apply(Eris.TextChannel.prototype, "startTyping", {
-			value: async function (this: Eris.TextChannel, rounds = 6) {
-				let r = 1;
-				await this.client.sendChannelTyping(this.id);
-				this.client.typing[this.id] = setInterval(async () => {
-					r++;
-					await this.client.sendChannelTyping(this.id);
-					if (r >= rounds) this.stopTyping();
-				}, per * 1e3);
+			get(this: Eris.TextChannel & { client: CoreClient; }) {
+				return this.client.startTyping.bind(this.client, this.id);
 			}
 		});
 
 		this.apply(Eris.TextChannel.prototype, "stopTyping", {
-			value: async function (this: Eris.TextChannel) {
-				clearInterval(this.client.typing[this.id]);
-				delete this.client.typing[this.id];
+			get(this: Eris.TextChannel & { client: CoreClient; }) {
+				return this.client.stopTyping.bind(this.client, this.id);
 			}
 		});
 

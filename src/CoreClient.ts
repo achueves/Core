@@ -25,6 +25,7 @@ export default abstract class CoreClient extends Eris.Client {
 		event: ClientEvent<CoreClient>;
 	}>;
 	col: MessageCollector;
+	typing: Map<string, NodeJS.Timeout>;
 	constructor(token: string, options?: Eris.ClientOptions) {
 		super(token, options);
 		this.w = new WebhookStore(this);
@@ -32,6 +33,36 @@ export default abstract class CoreClient extends Eris.Client {
 		this.cmd = new CommandHandler();
 		this.events = new Map();
 		this.col = new MessageCollector(this);
+		this.typing = new Map();
+	}
+
+	async getUser(id: string) {
+		if (this.users.has(id)) return this.users.get(id)!;
+		const user = await this.getRESTUser(id).catch(() => null);
+		if (user !== null) this.users.set(id, user);
+		return user;
+	}
+
+	async getGuild(id: string) {
+		if (this.guilds.has(id)) return this.guilds.get(id)!;
+		const guild = await this.getRESTGuild(id).catch(() => null);
+		return guild;
+	}
+
+	async startTyping(id: string, rounds = 6) {
+		const per = 7;
+		let r = 1;
+		await this.sendChannelTyping(id);
+		this.typing.set(id, setInterval(async () => {
+			r++;
+			await this.sendChannelTyping(id);
+			if (r >= rounds) this.stopTyping(id);
+		}, per * 1e3));
+	}
+
+	async stopTyping(id: string) {
+		clearInterval(this.typing.get(id)!);
+		this.typing.delete(id);
 	}
 }
 

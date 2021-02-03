@@ -36,12 +36,6 @@ declare module "eris" {
 		 * @memberof Guild
 		 */
 		readonly owner: Member;
-		/**
-		 * The client instance (should NOT be used, but we have to here)
-		 * @type {Eris.Client}
-		 * @memberof Guild
-		 */
-		_client: Client;
 	}
 
 	interface GuildChannel {
@@ -51,14 +45,5 @@ declare module "eris" {
 	interface TextChannel {
 		startTyping(rounds?: number): void;
 		stopTyping(): void;
-	}
-
-	interface Client {
-		typing: {
-			[k: string]: NodeJS.Timeout;
-		};
-
-		getUser(id: string): User | null;
-		getGuild(id: string): Guild | null;
 	}
 }
