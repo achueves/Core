@@ -5,15 +5,20 @@ import { db } from "../db";
 import GuildConfig from "../db/Models/GuildConfig";
 import UserConfig from "../db/Models/UserConfig";
 
-export default class ExtendedMessage<C extends CoreClient = CoreClient, T extends Eris.GuildTextableChannel = Eris.GuildTextableChannel> extends Eris.Message<T> {
+export default class ExtendedMessage<
+	C extends CoreClient = CoreClient,
+	UC extends UserConfig = UserConfig,
+	GC extends GuildConfig = GuildConfig,
+	T extends Eris.GuildTextableChannel = Eris.GuildTextableChannel
+	> extends Eris.Message<T> {
 	client: C;
 	slash: boolean;
 	slashInfo: {
 		id: string;
 		token: string;
 	} | null;
-	gConfig: GuildConfig;
-	uConfig: UserConfig;
+	gConfig: GC;
+	uConfig: UC;
 	args: string[];
 	cmd: Command<C> | null;
 	prefix: string;
@@ -54,8 +59,8 @@ export default class ExtendedMessage<C extends CoreClient = CoreClient, T extend
 	}
 
 	async load() {
-		const g = this.gConfig = await db.getGuild(this.channel.guild.id).then(v => v.fix());
-		const u = this.uConfig = await db.getUser(this.author.id).then(v => v.fix());
+		const g = this.gConfig = await db.getGuild(this.channel.guild.id).then(v => v.fix()) as GC;
+		const u = this.uConfig = await db.getUser(this.author.id).then(v => v.fix()) as UC;
 		const p = this.content.match(new RegExp(`(${g.prefix.map(v => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")).join("|")}|<@!?${this.client.user.id}>)(?:\s+)*`, "i"));
 		if (!p || p.length === 0) return false;
 		const prefix = this.prefix = p[1].toLowerCase();
