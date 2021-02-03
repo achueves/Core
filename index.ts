@@ -19,7 +19,7 @@ export * from "./src/general/Constants";
 import * as Constants from "./src/general/Constants";
 import DailyJoinsHandler from "./src/general/DailyJoinsHandler";
 import defaultEmojis from "./src/general/defaultEmojis.json";
-import EmbedBuider from "./src/general/EmbedBuilder";
+import EmbedBuilder from "./src/general/EmbedBuilder";
 import EvalUtil from "./src/general/EvalUtil";
 import ExtendedMessage from "./src/general/ExtendedMessage";
 import Language from "./src/general/Language";
@@ -34,7 +34,7 @@ export {
 	DatabaseTypes, DiscordTypes, Restrictions, AntiSpam, Category,
 	Command, CommandError, CommandHandler, CooldownHandler, ExtraHandlers,
 	GuildConfig, UserConfig, Database, BotFunctions, ClientEvent,
-	colors, Constants, DailyJoinsHandler, defaultEmojis, EmbedBuider,
+	colors, Constants, DailyJoinsHandler, defaultEmojis, EmbedBuilder,
 	EvalUtil, ExtendedMessage, Language, MessageCollector,
 	MonkeyPatch, pid, ReNice, WebhookStore, CoreClient
 }
