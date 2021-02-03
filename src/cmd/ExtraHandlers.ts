@@ -11,7 +11,7 @@ import { Time } from "@uwu-codes/utils";
 export default class ExtraHandlers<C extends CoreClient = CoreClient> {
 	constructor() { }
 
-	async checkPermissions(client: C, msg: ExtendedMessage, cmd: Command<C>, developers: string[], lang: Languages) {
+	async checkPermissions(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, developers: string[], lang: Languages) {
 		if (!("guild" in msg.channel)) return;
 		const bot = msg.channel.guild.me;
 
@@ -60,7 +60,7 @@ export default class ExtraHandlers<C extends CoreClient = CoreClient> {
 		return true;
 	}
 
-	async runHelp(client: C, msg: ExtendedMessage, cmd: Command<C>) {
+	async runHelp(client: C, msg: ExtendedMessage<C>, cmd: Command<C>) {
 		const v = await cmd.runOverride("help", client, msg, cmd);
 
 		if (v === "DEFAULT") {
@@ -106,7 +106,7 @@ export default class ExtraHandlers<C extends CoreClient = CoreClient> {
 		return true;
 	}
 
-	async runInvalidUsage(client: C, msg: ExtendedMessage, cmd: Command<C>, err: CommandError<"ERR_INVALID_USAGE">) {
+	async runInvalidUsage(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<"ERR_INVALID_USAGE", C>) {
 		// remove cooldown on invalid usage
 		client.cmd.cool.removeCooldown(msg.author.id, cmd);
 		const v = await cmd.runOverride("invalidUsage", client, msg, cmd, err);
