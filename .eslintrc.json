@@ -1,14 +1,3 @@
 {
-	"extends": "@uwu-codes/eslint-config",
-	"rules": {
-		"keyword-spacing": [
-			"error"
-		],
-		"@typescript-eslint/no-misused-promises": [
-			"error",
-			{
-				"checksVoidReturn": false
-			}
-		]
-	}
+	"extends": "@uwu-codes/eslint-config"
 }
