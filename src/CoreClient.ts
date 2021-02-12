@@ -1,15 +1,16 @@
-import { CommandHelper } from "@uwu-codes/discord-slash-commands";
-import Eris from "eris";
 import CommandHandler from "./cmd/CommandHandler";
 import db from "./db";
 import ClientEvent from "./general/ClientEvent";
 import MessageCollector from "./general/MessageCollector";
 import WebhookStore from "./general/WebhookStore";
+import Eris from "eris";
+import { CommandHelper } from "@uwu-codes/discord-slash-commands";
+import { AnyObject } from "@uwu-codes/utils";
 interface ConfigLike {
 	beta: boolean;
-	developers: string[];
+	developers: Array<string>;
 	defaults: {
-		config: Record<"user" | "guild", any>;
+		config: Record<"user" | "guild", AnyObject>;
 	};
 	client: {
 		supportServerId: string;
@@ -22,7 +23,7 @@ export default abstract class CoreClient extends Eris.Client {
 	w: WebhookStore<this>;
 	cmd: CommandHandler<this>;
 	events: Map<string, {
-		handler: (...args: any[]) => void;
+		handler: (...args: Array<unknown>) => void;
 		event: ClientEvent<CoreClient>;
 	}>;
 	col: MessageCollector<this>;
@@ -32,9 +33,9 @@ export default abstract class CoreClient extends Eris.Client {
 		this.w = new WebhookStore(this);
 		this.h = new CommandHelper(this.token!, this.user.id);
 		this.cmd = new CommandHandler();
-		this.events = new Map();
+		this.events = new Map() as CoreClient["events"];
 		this.col = new MessageCollector(this);
-		this.typing = new Map();
+		this.typing = new Map<string, NodeJS.Timeout>();
 		db.setClient(this);
 	}
 
@@ -62,7 +63,7 @@ export default abstract class CoreClient extends Eris.Client {
 		}, per * 1e3));
 	}
 
-	async stopTyping(id: string) {
+	stopTyping(id: string) {
 		clearInterval(this.typing.get(id)!);
 		this.typing.delete(id);
 	}

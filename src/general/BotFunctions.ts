@@ -1,14 +1,14 @@
 import EmbedBuilder from "./EmbedBuilder";
 import { Languages } from "./Language";
-import { Variables } from "@uwu-codes/utils";
-import { EmbedOptions } from "eris";
-import * as https from "https";
 import defaultEmojis from "./defaultEmojis.json";
-import Discord from "../@types/Discord";
 import { Colors } from "./Constants";
+import Discord from "../@types/Discord";
 import { Category, Command } from "../..";
 import CoreClient from "../CoreClient";
+import { EmbedOptions } from "eris";
+import { AnyObject, ModuleImport, Variables } from "@uwu-codes/utils";
 import * as fs from "fs-extra";
+import * as https from "https";
 import path from "path";
 
 export default class BotFunctions {
@@ -18,6 +18,7 @@ export default class BotFunctions {
 
 	/**
 	 * Authorize with Discord's OAuth.
+	 *
 	 * @static
 	 * @param {string} code - The code of the authorization.
 	 * @param {string} [redirectURL] - The redirect URL used.
@@ -25,7 +26,7 @@ export default class BotFunctions {
 	 * @memberof Internal
 	 * @example Internal.authorizeOAuth("someCodeFromDiscord, "clientId", "clientSecret", "https://example.com", ["bot]");
 	 */
-	static async authorizeOAuth(code: string, clientId: string, clientSecret: string, redirectURL: string, scopes: string[]): Promise<Discord.Oauth2Token> {
+	static async authorizeOAuth(code: string, clientId: string, clientSecret: string, redirectURL: string, scopes: Array<string>): Promise<Discord.Oauth2Token> {
 		return new Promise((a, b) => {
 			const req = https.request({
 				method: "GET",
@@ -36,12 +37,12 @@ export default class BotFunctions {
 					"User-Agent": Variables.USER_AGENT
 				}
 			}, (res) => {
-				const data: Buffer[] = [];
+				const data: Array<Buffer> = [];
 
 				res
 					.on("error", b)
 					.on("data", (d) => data.push(d))
-					.on("end", () => a(JSON.parse(Buffer.concat(data).toString())))
+					.on("end", () => a(JSON.parse(Buffer.concat(data).toString())));
 			});
 			req.write(`client_id=${clientId}&client_secret=${clientSecret}&grant_type=authorization_code&code=${code}&redirect_uri=${redirectURL}&scope=${scopes.join("+")}`);
 			req.end();
@@ -50,6 +51,7 @@ export default class BotFunctions {
 
 	/**
 	 * Get the user behind a Discord authorization token.
+	 *
 	 * @static
 	 * @param {string} auth - The bearer token.
 	 * @returns
@@ -68,12 +70,12 @@ export default class BotFunctions {
 						"User-Agent": Variables.USER_AGENT
 					}
 				}, (res) => {
-					const data: Buffer[] = [];
+					const data: Array<Buffer> = [];
 
 					res
 						.on("error", b)
 						.on("data", (d) => data.push(d))
-						.on("end", () => a(JSON.parse(Buffer.concat(data).toString())))
+						.on("end", () => a(JSON.parse(Buffer.concat(data).toString())));
 				})
 				.end()
 		);
@@ -125,7 +127,7 @@ export default class BotFunctions {
 			8: defaultEmojis.numbers.eight,
 			9: defaultEmojis.numbers.nine
 		};
-		Object.keys(m).map(v => num = num.toString().replace(new RegExp(v.toString(), "g"), (m as any)[v]));
+		Object.keys(m).map((v) => num = num.toString().replace(new RegExp(v.toString(), "g"), (m as AnyObject<string>)[v]));
 		return num;
 	}
 
@@ -138,12 +140,12 @@ export default class BotFunctions {
 	 * @memberof Internal
 	 * @example Internal.loadCommands("/opt/NPMBot/src/commands/developer", <Category>);
 	 */
-	static loadCommands<C extends CoreClient = CoreClient>(dir: string, cat: Category<C>) {
+	static loadCommands<C extends CoreClient>(dir: string, cat: Category<C>) {
 		const ext = __filename.split(".").slice(-1)[0];
-		fs.readdirSync(dir).filter(f => !fs.lstatSync(`${dir}/${f}`).isDirectory() && f.endsWith(ext) && f !== `index.${ext}`).map(f => {
+		fs.readdirSync(dir).filter((f) => !fs.lstatSync(`${dir}/${f}`).isDirectory() && f.endsWith(ext) && f !== `index.${ext}`).map((f) => {
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			let c = require(`${dir}/${f}`);
-			if (c.default) c = c.default;
+			let c = require(`${dir}/${f}`) as ModuleImport<Category<C>> | Category<C>;
+			if ("default" in c) c = c.default;
 			if (c instanceof Command) cat.addCommand(c);
 			else throw new TypeError(`Invalid command in file "${path.resolve(`${dir}/${f}`)}"`);
 		});

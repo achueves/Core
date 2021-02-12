@@ -1,14 +1,14 @@
-import { Strings } from "@uwu-codes/utils";
-import Eris from "eris";
-import CoreClient from "../CoreClient";
 import Category from "./Category";
 import Command from "./Command";
+import CoreClient from "../CoreClient";
+import { Strings } from "@uwu-codes/utils";
 
-export default class CommandError<N extends "ERR_INVALID_USAGE" = any, C extends CoreClient = CoreClient> extends Error {
+export default class CommandError<C extends CoreClient> extends Error {
 	cmd: Command<C>;
-	message: N;
+	// defined in super
+	message!: "INVALID_USAGE";
 	extra: string;
-	constructor(type: N, cmd: Command<C>, extra?: string) {
+	constructor(type: "INVALID_USAGE", cmd: Command<C>, extra?: string) {
 		super(type);
 		this.name = "CommandError";
 		this.cmd = cmd;
@@ -16,7 +16,7 @@ export default class CommandError<N extends "ERR_INVALID_USAGE" = any, C extends
 	}
 }
 
-export class ReloadError<T extends ("command" | "category"), C extends CoreClient = CoreClient> extends Error {
+export class ReloadError<T extends ("command" | "category"), C extends CoreClient> extends Error {
 	type: T;
 	info: T extends "command" ? Command<C> : Category<C>;
 	constructor(message: string, type: T, info: ReloadError<T, C>["info"]) {

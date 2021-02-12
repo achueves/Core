@@ -4,12 +4,13 @@ import * as Restrictions from "./Restrictions";
 import ExtraHandlers from "./ExtraHandlers";
 import CooldownHandler from "./CooldownHandler";
 import AntiSpam from "./AntiSpam";
-import path from "path";
 import CoreClient from "../CoreClient";
+import { ArrayOneOrMore, ModuleImport } from "@uwu-codes/utils";
+import path from "path";
 
 
-export default class CommandHandler<C extends CoreClient = CoreClient> {
-	categories: Category<C>[];
+export default class CommandHandler<C extends CoreClient> {
+	categories: Array<Category<C>>;
 	handlers: ExtraHandlers<C>;
 	cool: CooldownHandler<C>;
 	anti: AntiSpam;
@@ -23,8 +24,8 @@ export default class CommandHandler<C extends CoreClient = CoreClient> {
 		return Restrictions;
 	}
 
-	get commands(): Command<C>[] {
-		return [...this.categories.reduce((a, b) => a.concat(b.commands), [] as Command<C>[])];
+	get commands(): Array<Command<C>> {
+		return [...this.categories.reduce((a, b) => a.concat(b.commands), [] as Array<Command<C>>)];
 	}
 
 	get triggers(): Array<ArrayOneOrMore<string>> {
@@ -32,22 +33,24 @@ export default class CommandHandler<C extends CoreClient = CoreClient> {
 	}
 
 	get categoryNames() {
-		return this.categories.map(c => c.name);
+		return this.categories.map((c) => c.name);
 	}
 
 	getCategory(data: string) {
 		if (!data) throw new TypeError("Missing category.");
-		return this.categories.find(c => c.name === data) || null;
+		return this.categories.find((c) => c.name === data) || null;
 	}
 
 	addCategory(data: Category<C>) {
 		if (!data) throw new TypeError("Missing category.");
-		if (this.categoryNames.includes(data.name)) throw new TypeError(`Duplicate category "${data.name}" in file "${data.file}" (duplicate: ${this.categories.find(c => c.name === data.name)!.file})`);
+		if (this.categoryNames.includes(data.name)) throw new TypeError(`Duplicate category "${data.name}" in file "${data.file}" (duplicate: ${this.categories.find((c) => c.name === data.name)!.file})`);
 		for (const cmd of data.commands) {
 			for (const cmd2 of this.commands) {
-				if (cmd2.triggers.some(t => cmd.triggers.includes(t))) throw new TypeError(`Duplicate command "${cmd.triggers[0]}" (file: ${cmd.file}), duplicate file: ${cmd2.file}`);
+				if (cmd2.triggers.some((t) => cmd.triggers.includes(t))) throw new TypeError(`Duplicate command "${cmd.triggers[0]}" (file: ${cmd.file}), duplicate file: ${cmd2.file}`);
 			}
 		}
+
+
 		console.debug(["Command Handler"], `Added the category ${data.name} with ${data.commands.length} command${data.commands.length === 1 ? "" : "s"}.`);
 		this.categories.push(data);
 		return true;
@@ -55,7 +58,7 @@ export default class CommandHandler<C extends CoreClient = CoreClient> {
 
 	removeCategory(data: Category<C> | string) {
 		if (!data) throw new TypeError("Missing category.");
-		if (typeof data === "string") data = this.categories.find(c => c.name === data)!;
+		if (typeof data === "string") data = this.categories.find((c) => c.name === data)!;
 		if (!data || !this.categories.includes(data)) return false;
 		console.debug(["Command Handler"], `Remove the category ${data.name}.`);
 		this.categories.splice(this.categories.indexOf(data), 1);
@@ -64,12 +67,14 @@ export default class CommandHandler<C extends CoreClient = CoreClient> {
 
 	getCommand(data: Command<C> | string) {
 		if (!data) throw new TypeError("Missing command.");
-		const cmd = this.commands.find(c => c.triggers.some(t => data instanceof Command ? data.triggers.includes(t) : data === t));
+		const cmd = this.commands.find((c) => c.triggers.some((t) => data instanceof Command ? data.triggers.includes(t) : data === t));
 
-		if (!cmd) return {
-			cmd: null,
-			cat: null
-		};
+		if (!cmd) {
+			return {
+				cmd: null,
+				cat: null
+			};
+		}
 
 		return {
 			cmd,
@@ -85,14 +90,12 @@ export default class CommandHandler<C extends CoreClient = CoreClient> {
 
 		this.removeCategory(c.name);
 
-		let i = 0;
-
 		Object.keys(require.cache)
-			.filter(k => k.startsWith(c.file.split(path.sep.replace(/\\/, "\\\\")).slice(0, -1).join(path.sep.replace(/\\/, "\\\\")))) // because windows
-			.map(f => (i++, delete require.cache[require.resolve(f)]));
+			.filter((k) => k.startsWith(c.file.split(path.sep.replace(/\\/, "\\\\")).slice(0, -1).join(path.sep.replace(/\\/, "\\\\")))) // because windows
+			.map((f) => delete require.cache[require.resolve(f)]);
 
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const f = require(c.file).default;
+		const f = (require(c.file) as ModuleImport<Category<C>>).default;
 
 		this.addCategory(f);
 

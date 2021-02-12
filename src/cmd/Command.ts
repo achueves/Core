@@ -1,38 +1,40 @@
-/// <reference path="../@types/global.d.ts" />
+// / <reference path="../@types/global.d.ts" />
 import Category from "./Category";
 import CommandError from "./CommandError";
-import path from "path";
 import ExtendedMessage from "../general/ExtendedMessage";
 import CoreClient from "../CoreClient";
+import { CommandRestrictions, ErisPermissions } from "../@types/General";
+import { ArrayOneOrMore } from "@uwu-codes/utils";
+import path from "path";
 
-type OverrideReturn = any | "DEFAULT" | "ALLOW";
+type OverrideReturn = void | "DEFAULT";
 
-export default class Command<C extends CoreClient = CoreClient> {
+export default class Command<C extends CoreClient> {
 	triggers: ArrayOneOrMore<string>;
 	permissions: {
-		bot: ErisPermissions[];
+		bot: Array<ErisPermissions>;
 		// permissions that can be omitted but shouldn't
-		botUseful: ErisPermissions[];
-		user: ErisPermissions[];
+		botUseful: Array<ErisPermissions>;
+		user: Array<ErisPermissions>;
 	};
-	restrictions: CommandRestrictions[];
+	restrictions: Array<CommandRestrictions>;
 	usage: string;
 	description: string;
 	cooldown: number;
 	donatorCooldown: number;
 	category: Category<C>;
 	hasSlashVariant: boolean;
-	run: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<any>;
+	run: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<void>;
 	// allow isn't used right now but it can be a bypass system in the future
 	overrides:
-		{
-			permissionError: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, type: "user" | "bot", permissions: ErisPermissions[]) => Promise<OverrideReturn>;
-			invalidUsage: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<"ERR_INVALID_USAGE", C>) => Promise<OverrideReturn>;
-			help: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn>;
-			cooldown: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, time: number) => Promise<OverrideReturn>;
-		} & {
-			[k in CommandRestrictions]: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn>;
-		};
+	{
+		permissionError: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, type: "user" | "bot", permissions: Array<ErisPermissions>) => Promise<OverrideReturn> | OverrideReturn;
+		invalidUsage: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<C>) => Promise<OverrideReturn> | OverrideReturn;
+		help: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn> | OverrideReturn;
+		cooldown: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, time: number) => Promise<OverrideReturn> | OverrideReturn;
+	} & {
+		[k in CommandRestrictions]: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn> | OverrideReturn;
+	};
 	file: string;
 	constructor(triggers: ArrayOneOrMore<string>, file: string) {
 		if (!triggers) throw new TypeError("One or more triggers must be provided.");
@@ -47,23 +49,24 @@ export default class Command<C extends CoreClient = CoreClient> {
 		this.usage = "";
 		this.description = "";
 		this.cooldown = 0;
-		this.donatorCooldown = null!;
+		this.donatorCooldown = 0;
 		this.category = null!;
 		this.run = null!;
 		this.overrides = {
-			permissionError: async () => "DEFAULT",
-			invalidUsage: async () => "DEFAULT",
-			help: async () => "DEFAULT",
-			beta: async () => "DEFAULT",
-			developer: async () => "DEFAULT",
-			donator: async () => "DEFAULT",
-			guildOwner: async () => "DEFAULT",
-			nsfw: async () => "DEFAULT",
-			premium: async () => "DEFAULT",
-			supportServer: async () => "DEFAULT",
-			cooldown: async () => "DEFAULT"
+			permissionError: () => "DEFAULT",
+			invalidUsage: () => "DEFAULT",
+			help: () => "DEFAULT",
+			beta: () => "DEFAULT",
+			developer: () => "DEFAULT",
+			donator: () => "DEFAULT",
+			guildOwner: () => "DEFAULT",
+			nsfw: () => "DEFAULT",
+			premium: () => "DEFAULT",
+			supportServer: () => "DEFAULT",
+			cooldown: () => "DEFAULT"
 		};
 		this.file = file;
+		this.hasSlashVariant = false;
 	}
 
 	get lang() {
@@ -132,12 +135,15 @@ export default class Command<C extends CoreClient = CoreClient> {
 	}
 
 	setOverride<K extends keyof Command<C>["overrides"]>(type: K, override: Command<C>["overrides"][K]) {
-		(this.overrides[type] as any) = override;
+		this.overrides[type] = override;
 		return this;
 	}
 
-	runOverride<K extends keyof Command<C>["overrides"]>(type: K, client: C, ...args: (Parameters<Command<C>["overrides"][K]>)): ReturnType<Command<C>["overrides"][K]> {
-		return (this.overrides[type] as any).call(client, ...args);
+	runOverride<K extends keyof Command<C>["overrides"]>(type: K, client: C, ...args: (Parameters<Command<C>["overrides"][K]>)): OverrideReturn | Promise<OverrideReturn> {
+		// this shit is too complicated
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		return this.overrides[type].call(client, ...args);
 	}
 
 	setHasSlashVariant(data: boolean) {

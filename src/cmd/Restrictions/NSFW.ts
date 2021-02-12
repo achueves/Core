@@ -4,7 +4,7 @@ import Language from "../../general/Language";
 import CoreClient from "../../CoreClient";
 
 export const Label = "nsfw";
-export async function test<C extends CoreClient = CoreClient>(client: C, msg: ExtendedMessage<C>, cmd: Command<C>) {
+export async function test<C extends CoreClient>(client: C, msg: ExtendedMessage<C>, cmd: Command<C>) {
 	if (client.cnf === null) throw new TypeError("Client has not been initialized");
 	if (client.cnf.developers.includes(msg.author.id)) return true;
 

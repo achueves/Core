@@ -1,5 +1,5 @@
-import Eris from "eris";
 import Language, { Languages } from "./Language";
+import Eris from "eris";
 
 export default class EmbedBuilder {
 	private lang: Languages;
@@ -162,8 +162,8 @@ export default class EmbedBuilder {
 	}
 
 
-	addFields(...args: Eris.EmbedField[]) {
-		args.map(a => this.addField(a.name, a.value, a.inline));
+	addFields(...args: Array<Eris.EmbedField>) {
+		args.map((a) => this.addField(a.name, a.value, a.inline));
 		return this;
 	}
 
@@ -171,12 +171,12 @@ export default class EmbedBuilder {
 		return [...(this.json.fields ?? [])];
 	}
 
-	setFields(fields: Eris.EmbedField[]) {
+	setFields(fields: Array<Eris.EmbedField>) {
 		this.json.fields = fields;
 	}
 
 	toJSON(): Eris.EmbedOptions {
-		return Object(this.json); // to prevent external editing of internal properties
+		return Object(this.json) as Eris.EmbedOptions; // to prevent external editing of internal properties
 	}
 
 	get [Symbol.toStringTag]() {

@@ -37,4 +37,4 @@ export {
 	colors, Constants, DailyJoinsHandler, defaultEmojis, EmbedBuilder,
 	EvalUtil, ExtendedMessage, Language, MessageCollector,
 	MonkeyPatch, pid, ReNice, WebhookStore, CoreClient
-}
+};

@@ -1,12 +1,12 @@
-import { Redis } from "@uwu-codes/utils";
 import CoreClient from "../CoreClient";
+import { Redis } from "@uwu-codes/utils";
 
 export default class DailyJoinsHandler {
-	static async run<C extends CoreClient = CoreClient>(client: C) {
+	static async run<C extends CoreClient>(client: C) {
 		if (client.cnf === null) throw new TypeError("Client has not been initialized");
-		const d = new Date((Date.now() - 6e4));
-		const id = `${d.getMonth() + 1}-${d.getDate()}-${d.getFullYear()}`;
-		let k: string | number = await Redis.get(`stats:dailyJoins:${id}`).then(v => !v ? 0 : client.guilds.size - Number(v));
+		const d = new Date((Date.now() - 6e4)),
+			id = `${d.getMonth() + 1}-${d.getDate()}-${d.getFullYear()}`;
+		let k: string | number = await Redis.get(`stats:dailyJoins:${id}`).then((v) => !v ? 0 : client.guilds.size - Number(v));
 		if (!k) k = "Unknown.";
 		else k = (client.guilds.size - Number(k)).toString();
 		console.log("Daily Joins", `Daily joins for ${id}: ${k}`);

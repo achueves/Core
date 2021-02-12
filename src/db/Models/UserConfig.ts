@@ -1,7 +1,7 @@
-import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
 import { db, mdb } from "..";
-import { Utility } from "@uwu-codes/utils";
+import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
+import { AnyObject, Utility } from "@uwu-codes/utils";
 
 export default abstract class UserConfig {
 	id: string;
@@ -12,18 +12,21 @@ export default abstract class UserConfig {
 
 	private load(data: MaybeId<ConfigDataTypes<UserConfig, "id">>) {
 		if (!db.client?.cnf) throw new TypeError("Database has not been initialized.");
-		if ("_id" in data) delete (data as any)._id;
+		// eslint-disable-next-line no-underscore-dangle
+		if ("_id" in data) delete (data as AnyObject)._id;
 		Object.assign(this, Utility.mergeObjects(data, db.client.cnf.defaults.config.guild));
 		return this;
 	}
 
 	async reload() {
-		const r = await mdb.collection("users").findOne({ id: this.id });
+		const r = await mdb.collection<Parameters<UserConfig["load"]>[0]>("users").findOne({ id: this.id });
+		if (r === null) throw new TypeError("unexpected null UserConfig on reload");
 		this.load.call(this, r);
 		return this;
 	}
 
 	async mongoEdit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const j = await mdb.collection<T>("users").findOneAndUpdate({ id: this.id } as any, d, opt);
 		await this.reload();
 		return j;
@@ -33,7 +36,7 @@ export default abstract class UserConfig {
 		await mdb.collection("users").findOneAndUpdate({
 			id: this.id
 		}, {
-			$set: Utility.mergeObjects(data, this)
+			$set: Utility.mergeObjects(data, this as AnyObject)
 		});
 
 		return this.reload();
@@ -41,13 +44,15 @@ export default abstract class UserConfig {
 
 	async create() {
 		if (!db.client?.cnf) throw new TypeError("Database has not been initialized.");
-		const e = await mdb.collection("users").findOne({
+		const e = await mdb.collection<ConfigDataTypes<UserConfig>>("users").findOne({
 			id: this.id
 		});
-		if (!e) await mdb.collection("users").insertOne({
-			id: this.id,
-			...db.client.cnf.defaults.config.guild
-		});
+		if (!e) {
+			await mdb.collection("users").insertOne({
+				id: this.id,
+				...db.client.cnf.defaults.config.guild
+			});
+		}
 
 		return this;
 	}

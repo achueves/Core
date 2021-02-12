@@ -1,17 +1,19 @@
-/// <reference path="../@types/global.d.ts" />
+// / <reference path="../@types/global.d.ts" />
 import Command from "./Command";
-import * as fs from "fs-extra";
-import path from "path";
 import { ReloadError } from "./CommandError";
 import CoreClient from "../CoreClient";
+import { CategoryRestrictions } from "../@types/General";
+import * as fs from "fs-extra";
+import { ModuleImport } from "@uwu-codes/utils";
+import path from "path";
 
-export default class Category<C extends CoreClient = CoreClient> {
+export default class Category<C extends CoreClient> {
 	name: string;
 	displayName: string;
 	description: string;
-	restrictions: CategoryRestrictions[];
+	restrictions: Array<CategoryRestrictions>;
 	file: string;
-	commands: Command<C>[];
+	commands: Array<Command<C>>;
 	constructor(name: string, file: string) {
 		this.name = name;
 		this.displayName = "";
@@ -22,8 +24,8 @@ export default class Category<C extends CoreClient = CoreClient> {
 
 	}
 
-	get triggers(): string[] {
-		return this.commands.reduce((a, b) => a.concat(b.triggers), [] as string[]);
+	get triggers(): Array<string> {
+		return this.commands.reduce((a, b) => a.concat(b.triggers), [] as Array<string>);
 	}
 
 	get tsFile() {
@@ -48,14 +50,14 @@ export default class Category<C extends CoreClient = CoreClient> {
 	addCommand(data: Command<C>) {
 		if (!data) throw new TypeError("Missing command.");
 		// I could do this differently but nah
-		for (const t of data.triggers) if (this.triggers.includes(t)) throw new TypeError(`Duplicate trigger "${t}" in command "${data.tsFile}" (duplicate: ${this.commands.find(c => c.triggers.includes(t))!.tsFile})`);
+		for (const t of data.triggers) if (this.triggers.includes(t)) throw new TypeError(`Duplicate trigger "${t}" in command "${data.tsFile}" (duplicate: ${this.commands.find((c) => c.triggers.includes(t))!.tsFile})`);
 		data.setCategory(this);
 		this.commands.push(data);
 		return true;
 	}
 
 	removeCommand(data: Command<C> | string) {
-		if (typeof data === "string") data = this.commands.find(c => c.triggers.includes(data as string))!;
+		if (typeof data === "string") data = this.commands.find((c) => c.triggers.includes(data as string))!;
 		if (!data || !this.commands.includes(data)) return false;
 		this.commands.splice(this.commands.indexOf(data), 1);
 		return true;
@@ -63,14 +65,14 @@ export default class Category<C extends CoreClient = CoreClient> {
 
 	async reloadCommand(cmd: string | Command<C>, force?: boolean) {
 		if (cmd instanceof Command) cmd = cmd.triggers[0];
-		const c = this.commands.find(c => c.triggers.includes(cmd as string));
+		const c = this.commands.find((d) => d.triggers.includes(cmd as string));
 		if (!c) return false;
 		if (!force) {
 			if (!fs.existsSync(c.file)) throw new ReloadError("The JS command file does not exist, refusing to reload.", "command", c);
 			if (!fs.existsSync(c.tsFile)) throw new ReloadError<"command", C>("The TS command file does not exist, refusing to reload.", "command", c);
 		}
 		delete require.cache[require.resolve(c.file)];
-		const f = await import(c.file).then(d => d.default) as Command<C>;
+		const f = await import(c.file).then((d: ModuleImport<Command<C>>) => d.default);
 		this.removeCommand(cmd);
 		this.addCommand(f);
 		return true;

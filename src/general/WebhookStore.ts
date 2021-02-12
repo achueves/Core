@@ -1,7 +1,7 @@
-import Eris from "eris";
 import CoreClient from "../CoreClient";
+import Eris from "eris";
 
-export class Webhook<C extends CoreClient = CoreClient> implements WebhookConfig {
+export class Webhook<C extends CoreClient> implements WebhookConfig {
 	client: C;
 	id: string;
 	token: string;
@@ -40,12 +40,12 @@ export interface WebhookConfig {
 	username?: string;
 }
 
-export default class WebhookStore<C extends CoreClient = CoreClient> {
+export default class WebhookStore<C extends CoreClient> {
 	private webhooks: Map<string, Webhook<C>>;
 	client: C;
 	constructor(client: C) {
 		this.client = client;
-		this.webhooks = new Map();
+		this.webhooks = new Map<string, Webhook<C>>();
 	}
 
 	addHook(name: string, info: WebhookConfig) {

@@ -1,4 +1,5 @@
 import "eris";
+import { ErisPermissions } from "./General";
 
 declare module "eris" {
 	export interface Permission {
@@ -8,6 +9,7 @@ declare module "eris" {
 	interface User {
 		/**
 		 * combination of username#discriminator
+		 *
 		 * @type {string}
 		 * @memberof User
 		 */
@@ -17,6 +19,7 @@ declare module "eris" {
 	interface Member {
 		/**
 		 * combination of username#discriminator
+		 *
 		 * @type {string}
 		 * @memberof Member
 		 */
@@ -26,12 +29,14 @@ declare module "eris" {
 	interface Guild {
 		/**
 		 * The client's Member instance in the guild
+		 *
 		 * @type {Eris.Member}
 		 * @memberof Guild
 		 */
 		readonly me: Member;
 		/**
 		 * The Member instance of the guild owner
+		 *
 		 * @type {Eris.Member}
 		 * @memberof Guild
 		 */
@@ -39,7 +44,7 @@ declare module "eris" {
 	}
 
 	interface GuildChannel {
-		update(data: any): void;
+		update(data: Record<string, unknown>): void;
 	}
 
 	interface TextChannel {

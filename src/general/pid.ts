@@ -5,7 +5,11 @@ export default function pid(path: string) {
 	if (!fs.existsSync(b)) fs.mkdirpSync(b);
 	fs.writeFileSync(path, process.pid.toString());
 	function handle() {
-		try { fs.unlinkSync(path); } catch (e) { }
+		try {
+			fs.unlinkSync(path);
+		} catch (e) {
+			// not handling this error
+		}
 		process.exit(0);
 	}
 

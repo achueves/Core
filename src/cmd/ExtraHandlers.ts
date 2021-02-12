@@ -1,22 +1,20 @@
 import Command from "./Command";
+import CommandError from "./CommandError";
 import EmbedBuilder from "../general/EmbedBuilder";
 import Language, { Languages } from "../general/Language";
-import CommandError from "./CommandError";
 import defaultEmojis from "../general/defaultEmojis.json";
 import CoreClient from "../CoreClient";
 import ExtendedMessage from "../general/ExtendedMessage";
 import { Colors } from "../general/Constants";
+import { ErisPermissions } from "../@types/General";
 import { Time } from "@uwu-codes/utils";
 
-export default class ExtraHandlers<C extends CoreClient = CoreClient> {
-	constructor() { }
-
-	async checkPermissions(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, developers: string[], lang: Languages) {
+export default class ExtraHandlers<C extends CoreClient> {
+	async checkPermissions(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, developers: Array<string>, lang: Languages) {
 		if (!("guild" in msg.channel)) return;
-		const bot = msg.channel.guild.me;
-
-		const userMissing: ErisPermissions[] = [];
-		const botMissing: ErisPermissions[] = [];
+		const bot = msg.channel.guild.me,
+			userMissing: Array<ErisPermissions> = [],
+			botMissing: Array<ErisPermissions> = [];
 
 		if (!developers.includes(msg.author.id)) for (const perm of cmd.permissions.user) if (!msg.member!.permissions.has(perm)) userMissing.push(perm);
 		for (const perm of cmd.permissions.bot) if (!bot.permissions.has(perm)) botMissing.push(perm);
@@ -36,6 +34,7 @@ export default class ExtraHandlers<C extends CoreClient = CoreClient> {
 				});
 			}
 
+
 			return false;
 		}
 
@@ -53,6 +52,7 @@ export default class ExtraHandlers<C extends CoreClient = CoreClient> {
 						.toJSON()
 				});
 			}
+
 
 			return false;
 		}
@@ -75,19 +75,19 @@ export default class ExtraHandlers<C extends CoreClient = CoreClient> {
 						"{lang:other.help.green}",
 						"{lang:other.help.red}",
 						"```diff",
-						...Object.values(client.cmd.restrictions).map(r =>
+						...Object.values(client.cmd.restrictions).map((r) =>
 							`${cmd.restrictions.includes(r.Label) ? "+" : "-"} {lang:other.commandChecks.restrictions.${r.Label}.name}`
-						).sort((a, b) => a.startsWith("-") ? 1 : -1),
+						).sort((a) => a.startsWith("-") ? 1 : -1),
 						"```",
 						"",
 						"**{lang:other.words.bot$ucwords$} {lang:other.words.permissions$ucwords$}**",
 						"```bf",
-						...(cmd.permissions.bot.length === 0 ? ["> {lang:other.words.none$upper$}"] : cmd.permissions.bot.map(p => `> {lang:other.permissions.${p}}`)),
+						...(cmd.permissions.bot.length === 0 ? ["> {lang:other.words.none$upper$}"] : cmd.permissions.bot.map((p) => `> {lang:other.permissions.${p}}`)),
 						"```",
 						"",
 						"**{lang:other.words.user$ucwords$} {lang:other.words.permissions$ucwords$}**",
 						"```bf",
-						...(cmd.permissions.user.length === 0 ? ["> {lang:other.words.none$upper$}"] : cmd.permissions.user.map(p => `> {lang:other.permissions.${p}}`)),
+						...(cmd.permissions.user.length === 0 ? ["> {lang:other.words.none$upper$}"] : cmd.permissions.user.map((p) => `> {lang:other.permissions.${p}}`)),
 						"```",
 						"",
 						"**{lang:other.words.extra$ucwords$}**",
@@ -106,7 +106,7 @@ export default class ExtraHandlers<C extends CoreClient = CoreClient> {
 		return true;
 	}
 
-	async runInvalidUsage(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<"ERR_INVALID_USAGE", C>) {
+	async runInvalidUsage(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<C>) {
 		// remove cooldown on invalid usage
 		client.cmd.cool.removeCooldown(msg.author.id, cmd);
 		const v = await cmd.runOverride("invalidUsage", client, msg, cmd, err);

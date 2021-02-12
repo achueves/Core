@@ -1,6 +1,6 @@
+import FullColors from "./colors.json";
 import Eris from "eris";
 
-import FullColors from "./colors.json";
 
 export const Colors = {
 	gold: 0xFFD700,

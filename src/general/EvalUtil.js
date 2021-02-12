@@ -1,3 +1,4 @@
+/* eslint-disable */
 // this external function is used for evals as typescript screws with the context and variables
 // this is also the reason this file is plain javascript, and not typescript
 
