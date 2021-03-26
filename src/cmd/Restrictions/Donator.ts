@@ -7,7 +7,8 @@ export const Label = "donator";
 export async function test<C extends ProvidedClientExtra, CNF extends ConfigLike>(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, config: CNF, Language: Lang){
 	if (config === null) throw new TypeError("Client has not been initialized");
 	if (config.developers.includes(msg.author.id)) return true;
-	const d = await msg.uConfig.checkPremium(true);
+	if (!("checkPremium" in msg.uConfig)) throw new TypeError("Cannot check premium due to missing check function.");
+	const d = await msg.uConfig.checkPremium!(true);
 	if (cmd.restrictions.includes("donator") && !d.active) {
 		const v = await cmd.runOverride("donator", client, msg, cmd);
 		if (v === "DEFAULT") await msg.channel.createMessage(`<@!${msg.author.id}>, ${Language.get(msg.gConfig.settings.lang, "other.commandChecks.restrictions.donator.error")}`);

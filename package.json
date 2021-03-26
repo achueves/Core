@@ -1,6 +1,6 @@
 {
   "name": "@uwu-codes/core",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "description": "A core library for my bots.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
