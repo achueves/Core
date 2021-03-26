@@ -2,14 +2,13 @@
 import Category from "./Category";
 import CommandError from "./CommandError";
 import ExtendedMessage from "../general/ExtendedMessage";
-import CoreClient from "../CoreClient";
-import { CommandRestrictions, ErisPermissions } from "../@types/General";
+import { CommandRestrictions, ErisPermissions, ProvidedClientExtra } from "../@types/General";
 import { ArrayOneOrMore } from "@uwu-codes/utils";
 import path from "path";
 
 type OverrideReturn = void | "DEFAULT";
 
-export default class Command<C extends CoreClient> {
+export default class Command<C extends ProvidedClientExtra> {
 	triggers: ArrayOneOrMore<string>;
 	permissions: {
 		bot: Array<ErisPermissions>;

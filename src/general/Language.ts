@@ -20,13 +20,14 @@ export class LanguageError extends Error {
 	}
 }
 
-export type Languages = typeof Language["LANGUAGES"][number];
-export default class Language {
-	static DIR: string | null = null;
+export default class Language<L extends string = string> {
+	constructor(dir: string, lang: Array<L>) {
+		this.DIR = dir;
+		this.LANGUAGES = lang;
+	}
+	DIR: string | null = null;
 	// this shouldn't really be hardcoded but typings
-	static LANGUAGES = [
-		"en"
-	] as const;
+	LANGUAGES: Array<L>;
 	static MODIFIERS = {
 		ucwords: (str: string) => Strings.ucwords(str),
 		upper: (str: string) => str.toUpperCase(),
@@ -35,15 +36,11 @@ export default class Language {
 		bold: (str: string) => `**${str}**`
 	};
 
-	static setDir(dir: string) {
-		this.DIR = dir;
-	}
-
-	static get(lang: Languages, path: string, formatArgs: Array<string | number>, nullOnNotFound: true, random: true, returnPathOnly?: boolean): string | null;
-	static get(lang: Languages, path: string, formatArgs?: Array<string | number>, nullOnNotFound?: false, random?: true, returnPathOnly?: boolean): string;
-	static get(lang: Languages, path: string, formatArgs: Array<string | number>, nullOnNotFound: true, random?: false, returnPathOnly?: boolean): Array<string> | null;
-	static get(lang: Languages, path: string, formatArgs: Array<string | number>, nullOnNotFound?: false, random?: false, returnPathOnly?: boolean): Array<string>;
-	static get(lang: Languages, path: string, formatArgs?: Array<string | number>, nullOnNotFound?: boolean, random?: boolean, returnPathOnly?: boolean): string | Array<string> | null {
+	get(lang: L, path: string, formatArgs: Array<string | number>, nullOnNotFound: true, random: true, returnPathOnly?: boolean): string | null;
+	get(lang: L, path: string, formatArgs?: Array<string | number>, nullOnNotFound?: false, random?: true, returnPathOnly?: boolean): string;
+	get(lang: L, path: string, formatArgs: Array<string | number>, nullOnNotFound: true, random?: false, returnPathOnly?: boolean): Array<string> | null;
+	get(lang: L, path: string, formatArgs: Array<string | number>, nullOnNotFound?: false, random?: false, returnPathOnly?: boolean): Array<string>;
+	get(lang: L, path: string, formatArgs?: Array<string | number>, nullOnNotFound?: boolean, random?: boolean, returnPathOnly?: boolean): string | Array<string> | null {
 		if (this.DIR === null) throw new TypeError("Language.DIR was not set.");
 		if (!fs.existsSync(`${this.DIR}/${lang}`)) throw new TypeError(`Directory "${p.resolve(`${this.DIR}/${lang}`)}" for language "${lang}" does not exist.`);
 		function loop(dir: string, parts: Array<string>): string | Array<string> | null {
@@ -78,7 +75,7 @@ export default class Language {
 		}
 	}
 
-	static parseString(lang: Languages, str: string): string {
+	parseString(lang: L, str: string): string {
 		if (!str) return "";
 		const a = /{lang:(.*?)}/.exec(str);
 		if (!a) return str;
@@ -88,7 +85,7 @@ export default class Language {
 		(c.match(/\$(.*?)\$/g) || []).map((mod) => {
 			mod = mod.replace(/\$/g, "");
 			c = c.replace(`$${mod}$`, "");
-			const j = this.MODIFIERS[mod as keyof typeof Language["MODIFIERS"]];
+			const j = Language.MODIFIERS[mod as keyof typeof Language["MODIFIERS"]];
 			if (!j) {
 				const e = new LanguageError("UnknownModifierError", `Unknown modifier "${mod}"`).stack;
 				// would be Logger but circular dependencies suck

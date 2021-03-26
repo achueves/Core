@@ -1,16 +1,19 @@
+import getErisClient from "./getErisClient";
 import Command from "../cmd/Command";
-import CoreClient from "../CoreClient";
 import { db } from "../db";
 import GuildConfig from "../db/Models/GuildConfig";
 import UserConfig from "../db/Models/UserConfig";
+import { ProvidedClientExtra } from "../@types/General";
 import Eris from "eris";
+import { BaseClusterWorker } from "eris-fleet";
 
 export default class ExtendedMessage<
-	C extends CoreClient,
+	C extends ProvidedClientExtra,
 	UC extends UserConfig = UserConfig,
 	GC extends GuildConfig = GuildConfig,
 	CH extends Eris.GuildTextableChannel = Eris.GuildTextableChannel
-> extends Eris.Message<CH> {
+	// eslint-disable-next-line @typescript-eslint/indent
+	> extends Eris.Message<CH> {
 	// these are defined inside the load function
 	client!: C;
 	slash!: boolean;
@@ -38,7 +41,7 @@ export default class ExtendedMessage<
 				...msg,
 				mentions: msg.mentions.map((v) => v.id),
 				timestamp: new Date(msg.timestamp).toISOString()
-			}, client);
+			}, getErisClient(client));
 		}
 
 
@@ -65,20 +68,21 @@ export default class ExtendedMessage<
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			u = this.uConfig = await db.getUser(this.author.id).then((v) => v.fix()) as UC,
 			// eslint-disable-next-line no-useless-escape
-			p = new RegExp(`(${g.prefix.map((v) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")).join("|")}|<@!?${this.client.user.id}>)(?:\s+)*`, "i").exec(this.content);
+			p = new RegExp(`(${g.prefix.map((v) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")).join("|")}|<@!?${getErisClient(this.client).user.id}>)(?:\s+)*`, "i").exec(this.content);
 		if (!p || p.length === 0) return false;
 		const prefix = this.prefix = p[1].toLowerCase();
 		if (!this.content.toLowerCase().startsWith(prefix)) return false;
 		if (!g.prefix.includes(this.prefix)) this.prefix = g.prefix[0];
-		const args = this.args = this.content.slice(prefix.length).split(" ").filter((a) => a.length > 0 && !/^--(.{1,})(?:=(.*))?$/.exec(a)),
-			c = args.splice(0, 1)[0]?.toLowerCase(),
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			cmd = this.cmd = !c ? null : this.client.cmd.getCommand(c).cmd,
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			d = this.dashedArgs = {
-				value: this.content.slice(prefix.length).split(" ").map((a) => new RegExp("^--([^=].{1,})$").exec(a)).map((a) => !a || !a[1] ? null : a[1]).filter((a) => a !== null) as Array<string>,
-				keyValue: this.content.slice(prefix.length).split(" ").map((a) => new RegExp("^--(.{1,})=(.*)$").exec(a)).map((a) => !a || a.length < 3 ? null : ({ [a[1]]: a[2] })).filter((a) => a !== null).reduce((a, b) => ({ ...a, ...b }), {}) as { [k: string]: string; }
-			};
+		const args = this.args = this.content.slice(prefix.length).split(" ").filter((a) => a.length > 0 && !/^--(.{1,})(?:=(.*))?$/.exec(a));
+		const c = args.splice(0, 1)[0]?.toLowerCase();
+		// constraint bs
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
+		this.cmd = !c ? null : this.client.cmd.getCommand(c).cmd;
+		this.dashedArgs = {
+			value: this.content.slice(prefix.length).split(" ").map((a) => new RegExp("^--([^=].{1,})$").exec(a)).map((a) => !a || !a[1] ? null : a[1]).filter((a) => a !== null) as Array<string>,
+			keyValue: this.content.slice(prefix.length).split(" ").map((a) => new RegExp("^--(.{1,})=(.*)$").exec(a)).map((a) => !a || a.length < 3 ? null : ({ [a[1]]: a[2] })).filter((a) => a !== null).reduce((a, b) => ({ ...a, ...b }), {}) as { [k: string]: string; }
+		};
 		return true;
 	}
 
@@ -86,13 +90,20 @@ export default class ExtendedMessage<
 	async getUserFromArgs(argPos = 0, useMentions = true, mentionPos = argPos): Promise<Eris.User | null> {
 		if (useMentions && this.mentionList.users[mentionPos]) return this.mentionList.users[mentionPos];
 		if (!this.args || !this.args[argPos]) return null;
-		const t = this.args[argPos].toLowerCase(),
+		const t = this.args[argPos].toLowerCase();
+		if (this.client instanceof BaseClusterWorker) {
+			const [, a, b] = /(?:<@!?([0-9]{15,21})>|([0-9]{15,21}))/.exec(t) ?? [];
+			const id = a || b ? await (this.client.ipc.fetchUser(a || b) as Promise<Eris.User | null>).catch(() => null) : null;
+			if (id !== null) return id;
+		} else {
+			const username = getErisClient(this.client).users.find((u) => u.username.toLowerCase() === t);
+			const tag = getErisClient(this.client).users.find((u) => `${u.username}#${u.discriminator}`.toLowerCase() === t);
+			const [, a, b] = /(?:<@!?([0-9]{15,21})>|([0-9]{15,21}))/.exec(t) ?? [];
+			const id = (a || b) && "getUser" in this.client ? this.client.getUser!(a || b).catch(() => null) : null;
+			return username || tag || id || null;
+		}
 
-			username = this.client.users.find((u) => u.username.toLowerCase() === t),
-			tag = this.client.users.find((u) => `${u.username}#${u.discriminator}`.toLowerCase() === t),
-			[, a, b] = /(?:<@!?([0-9]{15,21})>|([0-9]{15,21}))/.exec(t) ?? [],
-			id = a || b ? await this.client.getUser(a || b).catch(() => null) : null;
-		return username || tag || id || null;
+		return null;
 	}
 
 	async getMemberFromArgs(argPos = 0, useMentions = true, mentionPos = argPos): Promise<Eris.Member | null> {
@@ -123,7 +134,7 @@ export default class ExtendedMessage<
 		let id: T | null = null;
 		if (/[0-9]{15,21}/.test(t)) {
 			id = this.channel.guild.channels.find((c) => c.id === this.args[argPos]) as T ?? null;
-			if (id === null) id = await this.client.getRESTChannel(t).catch(() => null) as T;
+			if (id === null) id = await getErisClient(this.client).getRESTChannel(t).catch(() => null) as T;
 		}
 
 		return name || id || null;

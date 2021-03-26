@@ -1,7 +1,8 @@
-import CoreClient from "../CoreClient";
+import getErisClient from "./getErisClient";
+import { ProvidedClient, ProvidedClientExtra } from "../@types/General";
 import Eris from "eris";
 
-export class Webhook<C extends CoreClient> implements WebhookConfig {
+export class Webhook<C extends ProvidedClient | ProvidedClientExtra> implements WebhookConfig {
 	client: C;
 	id: string;
 	token: string;
@@ -16,10 +17,10 @@ export class Webhook<C extends CoreClient> implements WebhookConfig {
 	}
 
 	async fetch() {
-		return this.client.getWebhook(this.id, this.token);
+		return getErisClient(this.client).getWebhook(this.id, this.token);
 	}
 	async delete(reason?: string) {
-		return this.client.deleteWebhook(this.id, this.token, reason);
+		return getErisClient(this.client).deleteWebhook(this.id, this.token, reason);
 	}
 	async execute(payload: Omit<Eris.WebhookPayload, "wait">) {
 		const data: Eris.WebhookPayload & { wait: true; } = {
@@ -29,7 +30,7 @@ export class Webhook<C extends CoreClient> implements WebhookConfig {
 
 		if (this.avatar && !payload.avatarURL) data.avatarURL = this.avatar;
 		if (this.username && !payload.username) data.username = this.username;
-		return this.client.executeWebhook(this.id, this.token, data);
+		return getErisClient(this.client).executeWebhook(this.id, this.token, data);
 	}
 }
 
@@ -40,28 +41,27 @@ export interface WebhookConfig {
 	username?: string;
 }
 
-export default class WebhookStore<C extends CoreClient> {
-	private webhooks: Map<string, Webhook<C>>;
+export default class WebhookStore<C extends ProvidedClient = ProvidedClient, K extends string = string> {
+	private webhooks = new Map<K, Webhook<C>>();
 	client: C;
 	constructor(client: C) {
 		this.client = client;
-		this.webhooks = new Map<string, Webhook<C>>();
 	}
 
-	addHook(name: string, info: WebhookConfig) {
-		this.webhooks.set(name, new Webhook(this.client, info));
+	addHook(name: K, info: WebhookConfig) {
+		this.webhooks.set(name, new Webhook<C>(this.client, info));
 	}
 
-	addBulk(list: Record<string, WebhookConfig>) {
+	addBulk(list: Record<K, WebhookConfig>) {
 		Object.entries<WebhookConfig>(list).map(([name, info]) =>
 			this.webhooks.set(
-				name,
-				new Webhook<C>(this.client, info)
+				name as K,
+				new Webhook(this.client, info)
 			)
 		);
 	}
 
-	get(name: string) {
+	get(name: K) {
 		return this.webhooks.get(name) ?? null;
 	}
 }

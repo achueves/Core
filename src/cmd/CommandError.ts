@@ -1,9 +1,9 @@
 import Category from "./Category";
 import Command from "./Command";
-import CoreClient from "../CoreClient";
+import { ProvidedClientExtra } from "../@types/General";
 import { Strings } from "@uwu-codes/utils";
 
-export default class CommandError<C extends CoreClient> extends Error {
+export default class CommandError<C extends ProvidedClientExtra> extends Error {
 	cmd: Command<C>;
 	// defined in super
 	message!: "INVALID_USAGE";
@@ -16,7 +16,7 @@ export default class CommandError<C extends CoreClient> extends Error {
 	}
 }
 
-export class ReloadError<T extends ("command" | "category"), C extends CoreClient> extends Error {
+export class ReloadError<T extends ("command" | "category"), C extends ProvidedClientExtra> extends Error {
 	type: T;
 	info: T extends "command" ? Command<C> : Category<C>;
 	constructor(message: string, type: T, info: ReloadError<T, C>["info"]) {

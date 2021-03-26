@@ -1,8 +1,8 @@
-import CoreClient from "../CoreClient";
+import { ProvidedClientExtra } from "../@types/General";
 import Eris from "eris";
 
 export default class MonkeyPatch {
-	static init() {
+	static init(typing?: boolean) {
 		this.apply(Eris.User.prototype, "tag", {
 			get(this: Eris.User) {
 				return `${this.username}#${this.discriminator}`;
@@ -28,23 +28,37 @@ export default class MonkeyPatch {
 			}
 		});
 
-		this.apply(Eris.TextChannel.prototype, "startTyping", {
-			get(this: Eris.TextChannel & { client: CoreClient; }) {
-				return this.client.startTyping.bind(this.client, this.id);
-			}
-		});
+		if (typing === true) {
+			const per = 7;
+			this.apply(Eris.TextChannel.prototype, "startTyping", {
+				async value (this: Eris.TextChannel & { client: ProvidedClientExtra; }, rounds = 6) {
+					if (typeof this.client.typing === "undefined") this.client.typing = {};
+					let r = 1;
+					await this.client.sendChannelTyping(this.id);
+					this.client.typing[this.id] = setInterval(async () => {
+						r++;
+						await this.client.sendChannelTyping(this.id);
+						if (r >= rounds) this.stopTyping();
+					}, per * 1e3);
+				}
+			});
 
-		this.apply(Eris.TextChannel.prototype, "stopTyping", {
-			get(this: Eris.TextChannel & { client: CoreClient; }) {
-				return this.client.stopTyping.bind(this.client, this.id);
-			}
-		});
+			this.apply(Eris.TextChannel.prototype, "stopTyping", {
+				async value (this: Eris.TextChannel & { client: ProvidedClientExtra; }) {
+					if (typeof this.client.typing === "undefined") this.client.typing = {};
+					clearInterval(this.client.typing[this.id]);
+					delete this.client.typing[this.id];
+				}
+			});
+		}
 
-		const ou = Eris.GuildChannel.prototype.update.bind(Eris.GuildChannel);
+		// they finally merged my pr for this
+		// https://github.com/abalabahaha/eris/pull/1110
+		/* const ou = Eris.GuildChannel.prototype.update.bind(Eris.GuildChannel);
 		Eris.GuildChannel.prototype.update = (function (data) {
 			ou.call(this, data);
 			this.nsfw = Boolean(data.nsfw);
-		});
+		}); */
 
 		this.apply(Eris.Client.prototype, "getUser", {
 			async value(this: Eris.Client, id: string) {

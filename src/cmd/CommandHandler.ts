@@ -4,12 +4,12 @@ import * as Restrictions from "./Restrictions";
 import ExtraHandlers from "./ExtraHandlers";
 import CooldownHandler from "./CooldownHandler";
 import AntiSpam from "./AntiSpam";
-import CoreClient from "../CoreClient";
+import { ProvidedClientExtra } from "../@types/General";
 import { ArrayOneOrMore, ModuleImport } from "@uwu-codes/utils";
 import path from "path";
 
 
-export default class CommandHandler<C extends CoreClient> {
+export default class CommandHandler<C extends ProvidedClientExtra> {
 	categories: Array<Category<C>>;
 	handlers: ExtraHandlers<C>;
 	cool: CooldownHandler<C>;

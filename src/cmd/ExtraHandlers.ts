@@ -3,13 +3,13 @@ import CommandError from "./CommandError";
 import EmbedBuilder from "../general/EmbedBuilder";
 import Language, { Languages } from "../general/Language";
 import defaultEmojis from "../general/defaultEmojis.json";
-import CoreClient from "../CoreClient";
 import ExtendedMessage from "../general/ExtendedMessage";
 import { Colors } from "../general/Constants";
-import { ErisPermissions } from "../@types/General";
+import { ErisPermissions, ProvidedClientExtra } from "../@types/General";
+import getErisClient from "../general/getErisClient";
 import { Time } from "@uwu-codes/utils";
 
-export default class ExtraHandlers<C extends CoreClient> {
+export default class ExtraHandlers<C extends ProvidedClientExtra> {
 	async checkPermissions(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, developers: Array<string>, lang: Languages) {
 		if (!("guild" in msg.channel)) return;
 		const bot = msg.channel.guild.me,
@@ -29,7 +29,7 @@ export default class ExtraHandlers<C extends CoreClient> {
 						.setDescription(`{lang:other.commandChecks.permission.user.description|${userMissing.length === 1 ? "" : "s"}|${userMissing.join(", ")}}`)
 						.setColor(Colors.red)
 						.setTimestamp(new Date().toISOString())
-						.setFooter("NPM loves you, and so do we.", client.user.avatarURL)
+						.setFooter("NPM loves you, and so do we.", getErisClient(client).user.avatarURL)
 						.toJSON()
 				});
 			}
@@ -48,7 +48,7 @@ export default class ExtraHandlers<C extends CoreClient> {
 						.setDescription(`{lang:other.commandChecks.permission.bot.description|${botMissing.length === 1 ? "" : "s"}|${botMissing.join(", ")}}`)
 						.setColor(Colors.red)
 						.setTimestamp(new Date().toISOString())
-						.setFooter("NPM loves you, and so do we.", client.user.avatarURL)
+						.setFooter("NPM loves you, and so do we.", getErisClient(client).user.avatarURL)
 						.toJSON()
 				});
 			}
@@ -108,6 +108,9 @@ export default class ExtraHandlers<C extends CoreClient> {
 
 	async runInvalidUsage(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<C>) {
 		// remove cooldown on invalid usage
+		// constraint bs
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		client.cmd.cool.removeCooldown(msg.author.id, cmd);
 		const v = await cmd.runOverride("invalidUsage", client, msg, cmd, err);
 

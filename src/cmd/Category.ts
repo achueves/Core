@@ -1,13 +1,12 @@
 // / <reference path="../@types/global.d.ts" />
 import Command from "./Command";
 import { ReloadError } from "./CommandError";
-import CoreClient from "../CoreClient";
-import { CategoryRestrictions } from "../@types/General";
+import { CategoryRestrictions, ProvidedClientExtra } from "../@types/General";
 import * as fs from "fs-extra";
 import { ModuleImport } from "@uwu-codes/utils";
 import path from "path";
 
-export default class Category<C extends CoreClient> {
+export default class Category<C extends ProvidedClientExtra> {
 	name: string;
 	displayName: string;
 	description: string;

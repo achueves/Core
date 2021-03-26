@@ -4,7 +4,7 @@ import defaultEmojis from "./defaultEmojis.json";
 import { Colors } from "./Constants";
 import Discord from "../@types/Discord";
 import { Category, Command } from "../..";
-import CoreClient from "../CoreClient";
+import { ProvidedClientExtra } from "../@types/General";
 import { EmbedOptions } from "eris";
 import { AnyObject, ModuleImport, Variables } from "@uwu-codes/utils";
 import * as fs from "fs-extra";
@@ -140,7 +140,7 @@ export default class BotFunctions {
 	 * @memberof Internal
 	 * @example Internal.loadCommands("/opt/NPMBot/src/commands/developer", <Category>);
 	 */
-	static loadCommands<C extends CoreClient>(dir: string, cat: Category<C>) {
+	static loadCommands<C extends ProvidedClientExtra>(dir: string, cat: Category<C>) {
 		const ext = __filename.split(".").slice(-1)[0];
 		fs.readdirSync(dir).filter((f) => !fs.lstatSync(`${dir}/${f}`).isDirectory() && f.endsWith(ext) && f !== `index.${ext}`).map((f) => {
 			// eslint-disable-next-line @typescript-eslint/no-var-requires

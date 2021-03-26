@@ -1,8 +1,9 @@
-import CoreClient from "../CoreClient";
+import getErisClient from "./getErisClient";
+import { ProvidedClient, ProvidedClientExtra } from "../@types/General";
 import Eris from "eris";
 import { AnyFunction } from "@uwu-codes/utils";
 
-export default class MessageCollector<C extends CoreClient> {
+export default class MessageCollector<C extends ProvidedClient | ProvidedClientExtra> {
 	client: C;
 	collectors: Array<{
 		channel: string;
@@ -16,7 +17,7 @@ export default class MessageCollector<C extends CoreClient> {
 	constructor(client: C) {
 		this.client = client;
 		this.collectors = [];
-		this.client.on("messageCreate", this.processMessage.bind(this));
+		getErisClient(this.client).on("messageCreate", this.processMessage.bind(this));
 	}
 
 	processMessage(msg: Eris.Message<Eris.TextableChannel>) {

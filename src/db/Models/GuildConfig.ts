@@ -1,4 +1,3 @@
-import { Languages } from "../../general/Language";
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
 import { db, mdb } from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
@@ -7,7 +6,8 @@ import { AnyObject, Utility } from "@uwu-codes/utils";
 export default abstract class GuildConfig {
 	id: string;
 	settings!: {
-		lang: Languages;
+		// this can't be hardcoded on this side due to the way Language works
+		lang: string;
 	};
 	prefix!: Array<string>;
 	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>) {

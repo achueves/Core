@@ -1,12 +1,12 @@
 import ExtendedMessage from "../../general/ExtendedMessage";
 import Command from "../Command";
-import Language from "../../general/Language";
-import CoreClient from "../../CoreClient";
+import Lang from "../../general/Language";
+import { ConfigLike, ProvidedClientExtra } from "../../@types/General";
 
 export const Label = "donator";
-export async function test<C extends CoreClient>(client: C, msg: ExtendedMessage<C>, cmd: Command<C>){
-	if (client.cnf === null) throw new TypeError("Client has not been initialized");
-	if (client.cnf.developers.includes(msg.author.id)) return true;
+export async function test<C extends ProvidedClientExtra, CNF extends ConfigLike>(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, config: CNF, Language: Lang){
+	if (config === null) throw new TypeError("Client has not been initialized");
+	if (config.developers.includes(msg.author.id)) return true;
 	const d = await msg.uConfig.checkPremium(true);
 	if (cmd.restrictions.includes("donator") && !d.active) {
 		const v = await cmd.runOverride("donator", client, msg, cmd);

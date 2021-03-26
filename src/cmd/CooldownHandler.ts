@@ -1,7 +1,7 @@
 import Command from "./Command";
-import CoreClient from "../CoreClient";
+import { ProvidedClientExtra } from "../@types/General";
 
-export default class CooldownHandler<C extends CoreClient> {
+export default class CooldownHandler<C extends ProvidedClientExtra> {
 	private cooldowns: Array<{
 		command: string;
 		start: number;
