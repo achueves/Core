@@ -4,7 +4,7 @@ import { Colors } from "./Constants";
 import Discord from "../@types/Discord";
 import { Category, Command } from "../..";
 import { ProvidedClientExtra } from "../@types/General";
-import { EmbedOptions } from "eris";
+import Eris, { EmbedOptions } from "eris";
 import { AnyObject, ModuleImport, Variables } from "@uwu-codes/utils";
 import * as fs from "fs-extra";
 import * as https from "https";
@@ -148,5 +148,13 @@ export default class BotFunctions {
 			if (c instanceof Command) cat.addCommand(c);
 			else throw new TypeError(`Invalid command in file "${path.resolve(`${dir}/${f}`)}"`);
 		});
+	}
+
+	static getUserFlags(user: Eris.User) {
+		return Object.entries(Eris.Constants.UserFlags).map(([f, v]) => ({
+			[f]: ((user.publicFlags ?? 0) & v) !== 0
+		})).reduce((a, b) => ({ ...a, ...b }), {}) as {
+			[K in keyof typeof Eris.Constants.UserFlags]: boolean;
+		};
 	}
 }
