@@ -9,11 +9,12 @@ import {
 	RawRESTRequest, RawPacket, PartialUser, VoiceChannel, OldVoiceState,
 	WebhookData
 } from "eris";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 // @TODO FIND A WAY TO MAKE THIS NOT MANUAL
 export default class ClientEvent<C extends ProvidedClient | ProvidedClientExtra> {
-	// I've spent 6 hours trying to figure this out, *these can stay as any*
-	event: unknown;
+	// I've spent months hours trying to figure this out, these can stay like this
+	event: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	listener: Function;
 	constructor(event: "ready" | "disconnect", listener: (this: C) => void);
