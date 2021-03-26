@@ -1,7 +1,7 @@
 import Command from "./Command";
 import CommandError from "./CommandError";
 import EmbedBuilder from "../general/EmbedBuilder";
-import Language, { Languages } from "../general/Language";
+import Lang from "../general/Language";
 import defaultEmojis from "../general/defaultEmojis.json";
 import ExtendedMessage from "../general/ExtendedMessage";
 import { Colors } from "../general/Constants";
@@ -10,7 +10,7 @@ import getErisClient from "../general/getErisClient";
 import { Time } from "@uwu-codes/utils";
 
 export default class ExtraHandlers<C extends ProvidedClientExtra> {
-	async checkPermissions(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, developers: Array<string>, lang: Languages) {
+	async checkPermissions(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, developers: Array<string>) {
 		if (!("guild" in msg.channel)) return;
 		const bot = msg.channel.guild.me,
 			userMissing: Array<ErisPermissions> = [],
@@ -23,7 +23,7 @@ export default class ExtraHandlers<C extends ProvidedClientExtra> {
 			const v = await cmd.runOverride("permissionError", client, msg, cmd, "user", userMissing);
 			if (v === "DEFAULT") {
 				await msg.channel.createMessage({
-					embed: new EmbedBuilder(lang)
+					embed: new EmbedBuilder(msg.gConfig.settings.lang)
 						.setAuthor(msg.author.tag, msg.author.avatarURL)
 						.setTitle(`{lang:other.commandChecks.permission.user.title|${userMissing.length === 1 ? "" : "s"}}`)
 						.setDescription(`{lang:other.commandChecks.permission.user.description|${userMissing.length === 1 ? "" : "s"}|${userMissing.join(", ")}}`)
@@ -60,7 +60,7 @@ export default class ExtraHandlers<C extends ProvidedClientExtra> {
 		return true;
 	}
 
-	async runHelp(client: C, msg: ExtendedMessage<C>, cmd: Command<C>) {
+	async runHelp(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, Language: Lang) {
 		const v = await cmd.runOverride("help", client, msg, cmd);
 
 		if (v === "DEFAULT") {
@@ -106,7 +106,7 @@ export default class ExtraHandlers<C extends ProvidedClientExtra> {
 		return true;
 	}
 
-	async runInvalidUsage(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<C>) {
+	async runInvalidUsage(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<C>, Language: Lang) {
 		// remove cooldown on invalid usage
 		// constraint bs
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment

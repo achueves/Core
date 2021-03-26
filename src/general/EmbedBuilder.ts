@@ -1,12 +1,18 @@
-import Language, { Languages } from "./Language";
+import Language from "./Language";
 import Eris from "eris";
 
-export default class EmbedBuilder {
-	private lang: Languages;
+export default class EmbedBuilder<L extends string = string> {
+	private lang: L;
 	private json: Eris.EmbedOptions;
-	constructor(lang: Languages, json?: Eris.EmbedOptions) {
+	private langObj: Language<L> | null;
+	constructor(lang: L, langObj?: Language<L>) {
 		this.lang = lang;
-		this.json = json ?? {};
+		this.json = {};
+		this.langObj = langObj ?? null;
+	}
+
+	private formatString(str: string) {
+		return this.langObj ? this.langObj.parseString(this.lang, str) : str;
 	}
 
 	getTitle() {
@@ -14,7 +20,7 @@ export default class EmbedBuilder {
 	}
 
 	setTitle(title: string) {
-		this.json.title = Language.parseString(this.lang, title);
+		this.json.title = this.formatString(title);
 		return this;
 	}
 
@@ -28,7 +34,7 @@ export default class EmbedBuilder {
 	}
 
 	setDescription(description: string) {
-		this.json.description = Language.parseString(this.lang, description);
+		this.json.description = this.formatString(description);
 		return this;
 	}
 
@@ -85,7 +91,7 @@ export default class EmbedBuilder {
 
 	setFooter(text: string, iconURL?: string) {
 		this.json.footer = {
-			text: Language.parseString(this.lang, text)
+			text: this.formatString(text)
 		};
 		if (iconURL) this.json.footer.icon_url = iconURL;
 		return this;
@@ -134,7 +140,7 @@ export default class EmbedBuilder {
 
 	setAuthor(name: string, iconURL?: string, url?: string) {
 		this.json.author = {
-			name: Language.parseString(this.lang, name)
+			name: this.formatString(name)
 		};
 		if (iconURL) this.json.author.icon_url = iconURL;
 		if (url) this.json.author.url = url;
@@ -150,8 +156,8 @@ export default class EmbedBuilder {
 		inline = !!inline;
 		if (!(this.json.fields instanceof Array)) this.json.fields = [];
 		this.json.fields.push({
-			name: Language.parseString(this.lang, name),
-			value: Language.parseString(this.lang, value),
+			name: this.formatString(name),
+			value: this.formatString(value),
 			inline
 		});
 		return this;

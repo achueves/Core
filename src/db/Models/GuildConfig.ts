@@ -1,25 +1,26 @@
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
-import { db, mdb } from "..";
+import { mdb } from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
 export default abstract class GuildConfig {
+	private DEFAULTS: AnyObject;
 	id: string;
 	settings!: {
 		// this can't be hardcoded on this side due to the way Language works
 		lang: string;
 	};
 	prefix!: Array<string>;
-	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>) {
+	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>, def: AnyObject) {
 		this.id = id;
 		this.load.call(this, data);
+		this.DEFAULTS = def;
 	}
 
 	private load(data: MaybeId<ConfigDataTypes<GuildConfig, "id">>) {
-		if (!db.client?.cnf) throw new TypeError("Database has not been initialized.");
 		// eslint-disable-next-line no-underscore-dangle
 		if ("_id" in data) delete (data as AnyObject)._id;
-		Object.assign(this, Utility.mergeObjects(data, db.client.cnf.defaults.config.guild));
+		if (this.DEFAULTS) Object.assign(this, Utility.mergeObjects(data, this.DEFAULTS));
 		return this;
 	}
 
@@ -48,14 +49,13 @@ export default abstract class GuildConfig {
 	}
 
 	async create() {
-		if (!db.client?.cnf) throw new TypeError("Database has not been initialized.");
 		const e = await mdb.collection<ConfigDataTypes<GuildConfig>>("guilds").findOne({
 			id: this.id
 		});
 		if (e === null) {
 			await mdb.collection("guilds").insertOne({
 				id: this.id,
-				...db.client.cnf.defaults.config.guild
+				...(this.DEFAULTS ?? {})
 			});
 		}
 

@@ -1,6 +1,6 @@
 import UserConfig from "./Models/UserConfig";
 import GuildConfig from "./Models/GuildConfig";
-import CoreClient from "../CoreClient";
+import { ProvidedClient, ProvidedClientExtra } from "../@types/General";
 import { MongoClient, Collection, MongoClientOptions } from "mongodb";
 import { Timers } from "@uwu-codes/utils";
 import deasync from "deasync";
@@ -8,9 +8,9 @@ import deasync from "deasync";
 abstract class Database {
 	private static mainDB: string;
 	static connection: MongoClient;
-	static client: CoreClient;
+	static client: ProvidedClient | ProvidedClientExtra;
 
-	static setClient(client: CoreClient) {
+	static setClient(client: ProvidedClient | ProvidedClientExtra) {
 		this.client = client;
 	}
 
