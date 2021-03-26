@@ -1,6 +1,6 @@
 {
   "name": "@uwu-codes/core",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "A core library for my bots.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -26,7 +26,7 @@
     "deasync": "^0.1.21",
     "dot-object": "^2.1.4",
     "eris": "github:abalabahaha/eris#dev",
-    "eris-fleet": "github:danclay/eris-fleet#dev",
+    "eris-fleet": "npm:@furrybotco/eris-fleet@^0.3.5-dev.x",
     "fs-extra": "^9.1.0",
     "json5": "^2.2.0",
     "mongodb": "^3.6.4"
