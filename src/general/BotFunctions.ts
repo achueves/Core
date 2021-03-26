@@ -1,5 +1,4 @@
 import EmbedBuilder from "./EmbedBuilder";
-import { Languages } from "./Language";
 import defaultEmojis from "./defaultEmojis.json";
 import { Colors } from "./Constants";
 import Discord from "../@types/Discord";
@@ -93,9 +92,9 @@ export default class BotFunctions {
 	 * @example Utility.genErrorEmbed("en", "INVALID_USER");
 	 * @example Utility.genErrorEmbed("en", "INVALID_MEMBER", true);
 	 */
-	static genErrorEmbed(lang: Languages, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json: true): EmbedOptions;
-	static genErrorEmbed(lang: Languages, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json?: false): EmbedBuilder;
-	static genErrorEmbed(lang: Languages, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json?: boolean) {
+	static genErrorEmbed(lang: string, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json: true): EmbedOptions;
+	static genErrorEmbed(lang: string, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json?: false): EmbedBuilder;
+	static genErrorEmbed(lang: string, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json?: boolean) {
 		const e = new EmbedBuilder(lang)
 			.setTitle(`{lang:other.errorEmbed.${type}.title}`)
 			.setDescription(`{lang:other.errorEmbed.${type}.description}`)
