@@ -74,12 +74,4 @@ export default abstract class UserConfig {
 		activationTime: number | null;
 		active: boolean;
 	}>;
-
-	abstract getLevel?(g: string): number;
-	abstract checkVote?(): Promise<Record<"voted" | "weekend", boolean>>;
-	abstract getBadges?<ID extends string = string>(): Promise<Array<{
-		category: string;
-		emoji: string;
-		id: ID;
-	}>>;
 }
