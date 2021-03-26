@@ -1,4 +1,4 @@
-import FullColors from "./colors.json";
+import * as FullColors from "./Colors";
 import Eris from "eris";
 
 

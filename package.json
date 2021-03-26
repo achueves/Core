@@ -1,6 +1,6 @@
 {
   "name": "@uwu-codes/core",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "A core library for my bots.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/UWUCode/Core#readme",
   "dependencies": {
-    "@types/mongodb": "^3.6.7",
+    "@types/mongodb": "^3.6.10",
     "@uwu-codes/discord-slash-commands": "^1.0.2",
     "@uwu-codes/utils": "^1.0.18",
     "deasync": "^0.1.21",
@@ -28,17 +28,17 @@
     "eris": "github:abalabahaha/eris#dev",
     "fs-extra": "^9.1.0",
     "json5": "^2.2.0",
-    "mongodb": "^3.6.4"
+    "mongodb": "^3.6.5"
   },
   "devDependencies": {
     "@types/deasync": "^0.1.1",
     "@types/dot-object": "^2.1.2",
-    "@types/fs-extra": "^9.0.7",
+    "@types/fs-extra": "^9.0.9",
     "@types/json5": "^0.0.30",
-    "@types/node": "^14.14.27",
-    "@uwu-codes/eslint-config": "^1.0.6",
+    "@types/node": "^14.14.36",
+    "@uwu-codes/eslint-config": "^1.0.7",
     "@uwu-codes/tsconfig": "^1.0.1",
-    "eslint": "^7.20.0"
+    "eslint": "^7.22.0"
   },
   "optionalDependencies": {
     "eris-fleet": "npm:@furrybotco/eris-fleet@^0.3.5-dev.x"

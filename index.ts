@@ -14,7 +14,7 @@ import UserConfig from "./src/db/Models/UserConfig";
 import Database from "./src/db";
 import BotFunctions from "./src/general/BotFunctions";
 import ClientEvent from "./src/general/ClientEvent";
-import colors from "./src/general/colors.json";
+import * as Colors from "./src/general/Colors";
 export * from "./src/general/Constants";
 import * as Constants from "./src/general/Constants";
 import defaultEmojis from "./src/general/defaultEmojis.json";
@@ -30,7 +30,6 @@ export {
 	DatabaseTypes, DiscordTypes, Restrictions, AntiSpam, Category,
 	Command, CommandError, CommandHandler, CooldownHandler, ExtraHandlers,
 	GuildConfig, UserConfig, Database, BotFunctions, ClientEvent,
-	colors, Constants, defaultEmojis, EmbedBuilder,
-	EvalUtil, ExtendedMessage, Language, MessageCollector,
-	MonkeyPatch, WebhookStore
+	Colors, Constants, defaultEmojis, EmbedBuilder, EvalUtil,
+	ExtendedMessage, Language, MessageCollector, MonkeyPatch, WebhookStore
 };
