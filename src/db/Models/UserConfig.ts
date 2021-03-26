@@ -1,5 +1,5 @@
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
-import { mdb } from "..";
+import db from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
@@ -20,7 +20,7 @@ export default abstract class UserConfig {
 	}
 
 	async reload() {
-		const r = await mdb.collection<Parameters<UserConfig["load"]>[0]>("users").findOne({ id: this.id });
+		const r = await db.collection<Parameters<UserConfig["load"]>[0]>("users").findOne({ id: this.id });
 		if (r === null) throw new TypeError("unexpected null UserConfig on reload");
 		this.load.call(this, r);
 		return this;
@@ -28,13 +28,13 @@ export default abstract class UserConfig {
 
 	async mongoEdit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const j = await mdb.collection<T>("users").findOneAndUpdate({ id: this.id } as any, d, opt);
+		const j = await db.collection<T>("users").findOneAndUpdate({ id: this.id } as any, d, opt);
 		await this.reload();
 		return j;
 	}
 
 	async edit(data: ConfigEditTypes<this, "id">) {
-		await mdb.collection("users").findOneAndUpdate({
+		await db.collection("users").findOneAndUpdate({
 			id: this.id
 		}, {
 			$set: Utility.mergeObjects(data, this as AnyObject)
@@ -44,11 +44,11 @@ export default abstract class UserConfig {
 	}
 
 	async create() {
-		const e = await mdb.collection<ConfigDataTypes<UserConfig>>("users").findOne({
+		const e = await db.collection<ConfigDataTypes<UserConfig>>("users").findOne({
 			id: this.id
 		});
 		if (!e) {
-			await mdb.collection("users").insertOne({
+			await db.collection<Partial<ConfigDataTypes<UserConfig>>>("users").insertOne({
 				id: this.id,
 				...(this.DEFAULTS ?? {})
 			});
@@ -58,7 +58,7 @@ export default abstract class UserConfig {
 	}
 
 	async delete() {
-		await mdb.collection("users").findOneAndDelete({ id: this.id });
+		await db.collection("users").findOneAndDelete({ id: this.id });
 	}
 
 	async reset() {

@@ -1,5 +1,5 @@
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
-import { mdb } from "..";
+import db from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
@@ -25,7 +25,7 @@ export default abstract class GuildConfig {
 	}
 
 	async reload() {
-		const r = await mdb.collection<Parameters<GuildConfig["load"]>[0]>("guilds").findOne({ id: this.id });
+		const r = await db.collection<Parameters<GuildConfig["load"]>[0]>("guilds").findOne({ id: this.id });
 		if (r === null) throw new TypeError("unexpected null GuildConfig on reload");
 		this.load.call(this, r);
 		return this;
@@ -33,13 +33,13 @@ export default abstract class GuildConfig {
 
 	async mongoEdit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const j = await mdb.collection<T>("guilds").findOneAndUpdate({ id: this.id } as any, d, opt);
+		const j = await db.collection<T>("guilds").findOneAndUpdate({ id: this.id } as any, d, opt);
 		await this.reload();
 		return j;
 	}
 
 	async edit(data: ConfigEditTypes<this, "id">) {
-		await mdb.collection("guilds").findOneAndUpdate({
+		await db.collection("guilds").findOneAndUpdate({
 			id: this.id
 		}, {
 			$set: Utility.mergeObjects(data, this as AnyObject)
@@ -49,11 +49,11 @@ export default abstract class GuildConfig {
 	}
 
 	async create() {
-		const e = await mdb.collection<ConfigDataTypes<GuildConfig>>("guilds").findOne({
+		const e = await db.collection<ConfigDataTypes<GuildConfig>>("guilds").findOne({
 			id: this.id
 		});
 		if (e === null) {
-			await mdb.collection("guilds").insertOne({
+			await db.collection<Partial<ConfigDataTypes<GuildConfig>>>("guilds").insertOne({
 				id: this.id,
 				...(this.DEFAULTS ?? {})
 			});
@@ -63,7 +63,7 @@ export default abstract class GuildConfig {
 	}
 
 	async delete() {
-		await mdb.collection("guilds").findOneAndDelete({ id: this.id });
+		await db.collection("guilds").findOneAndDelete({ id: this.id });
 	}
 
 	async reset() {

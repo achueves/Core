@@ -49,11 +49,4 @@ abstract class Database {
 	static getGuild: (id: string) => Promise<GuildConfig>;
 }
 
-const { mongo, mdb } = Database;
-
-export {
-	Database as db,
-	mdb,
-	mongo
-};
 export default Database;

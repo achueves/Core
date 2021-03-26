@@ -1,6 +1,6 @@
 import getErisClient from "./getErisClient";
 import Command from "../cmd/Command";
-import { db } from "../db";
+import db from "../db";
 import GuildConfig from "../db/Models/GuildConfig";
 import UserConfig from "../db/Models/UserConfig";
 import { ProvidedClientExtra } from "../@types/General";

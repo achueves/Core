@@ -12,7 +12,9 @@ declare namespace General {
 
 	type ProvidedClient = Eris.Client | BaseClusterWorker;
 	type ProvidedClientExtra = ProvidedClient & {
-		cmd: CommandHandler<ProvidedClientExtra>;
+		// fuck you
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		cmd: CommandHandler<any>;
 		getUser?(id: string): Promise<Eris.User | null>;
 		getGuild?(id: string): Promise<Eris.Guild | null>;
 		typing?: Record<string, NodeJS.Timeout>;
