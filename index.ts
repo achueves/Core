@@ -1,4 +1,7 @@
-import "source-map-support/register";
+try {
+	require("source-map-support/register");
+// eslint-disable-next-line no-empty
+} catch (e) {}
 import DatabaseTypes from "./src/@types/db";
 import DiscordTypes from "./src/@types/Discord";
 import * as Restrictions from "./src/cmd/Restrictions";

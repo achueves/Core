@@ -80,6 +80,10 @@ abstract class Database {
 
 	static getUser: (id: string) => Promise<UserConfig>;
 	static getGuild: (id: string) => Promise<GuildConfig>;
+
+	static isDb(value: unknown): value is Database {
+		return value instanceof Database;
+	}
 }
 
 export default Database;

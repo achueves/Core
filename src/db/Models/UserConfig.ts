@@ -3,18 +3,22 @@ import Database from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
-export default abstract class UserConfig<D extends typeof Database = typeof Database> {
+export default abstract class UserConfig<DB extends typeof Database = typeof Database> {
 	private DEFAULTS: AnyObject;
-	private db: D;
+	private db: DB;
 	id: string;
-	constructor(id: string, data: MaybeId<ConfigDataTypes<UserConfig, "id">>, def: AnyObject, db: D) {
+	constructor(id: string, data: MaybeId<ConfigDataTypes<UserConfig, "id">>, def: AnyObject, db: DB) {
+		if (def === undefined) throw new TypeError("No defaults provided");
+		if (db === undefined) throw new TypeError("Invalid database provided.");
 		this.id = id;
-		this.load.call(this, data);
 		this.DEFAULTS = def;
 		this.db = db;
+		this.load.call(this, data);
 	}
 
 	private load(data: MaybeId<ConfigDataTypes<UserConfig, "id">>) {
+		if (this.DEFAULTS === undefined) throw new TypeError("No defaults provided");
+		if (this.db === undefined) throw new TypeError("Invalid database.");
 		// eslint-disable-next-line no-underscore-dangle
 		if ("_id" in data) delete (data as AnyObject)._id;
 		if (this.DEFAULTS) Object.assign(this, Utility.mergeObjects(data, this.DEFAULTS));

@@ -3,23 +3,27 @@ import Database from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
-export default abstract class GuildConfig<L extends string = string, D extends typeof Database = typeof Database> {
+export default abstract class GuildConfig<L extends string = string, DB extends typeof Database = typeof Database> {
 	private DEFAULTS: AnyObject;
-	private db: D;
+	private db: DB;
 	id: string;
 	settings!: {
 		// this can't be hardcoded on this side due to the way Language works
 		lang: L;
 	};
 	prefix!: Array<string>;
-	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>, def: AnyObject, db: D) {
+	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>, def: AnyObject, db: DB) {
+		if (def === undefined) throw new TypeError("No defaults provided");
+		if (db === undefined) throw new TypeError("Invalid database provided.");
 		this.id = id;
-		this.load.call(this, data);
 		this.DEFAULTS = def;
 		this.db = db;
+		this.load.call(this, data);
 	}
 
 	private load(data: MaybeId<ConfigDataTypes<GuildConfig, "id">>) {
+		if (this.DEFAULTS === undefined) throw new TypeError("No defaults provided");
+		if (this.db === undefined) throw new TypeError("Invalid database.");
 		// eslint-disable-next-line no-underscore-dangle
 		if ("_id" in data) delete (data as AnyObject)._id;
 		if (this.DEFAULTS) Object.assign(this, Utility.mergeObjects(data, this.DEFAULTS));
