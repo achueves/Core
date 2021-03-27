@@ -1,9 +1,9 @@
 import getErisClient from "./getErisClient";
 import Command from "../cmd/Command";
-import db from "../db";
 import GuildConfig from "../db/Models/GuildConfig";
 import UserConfig from "../db/Models/UserConfig";
 import { ProvidedClientExtra } from "../@types/General";
+import Database from "../db";
 import Eris from "eris";
 import { BaseClusterWorker } from "eris-fleet";
 
@@ -11,7 +11,7 @@ export default class ExtendedMessage<
 	C extends ProvidedClientExtra,
 	UC extends UserConfig = UserConfig,
 	GC extends GuildConfig = GuildConfig,
-	CH extends Eris.GuildTextableChannel = Eris.GuildTextableChannel
+	CH extends Eris.TextableChannel = Eris.GuildTextableChannel
 	// eslint-disable-next-line @typescript-eslint/indent
 	> extends Eris.Message<CH> {
 	// these are defined inside the load function
@@ -39,18 +39,19 @@ export default class ExtendedMessage<
 
 	get mentionList() {
 		return {
-			channels: this.channelMentions.map((c) => this.channel.guild.channels.get(c) || null).filter((c) => c),
+			channels: this.channelMentions.map((c) => this.channel instanceof Eris.GuildChannel  ? this.channel.guild.channels.get(c) || null : null).filter(Boolean),
 			channelsRaw: this.channelMentions,
-			roles: this.roleMentions.map((r) => this.channel.guild.roles.get(r) || null).filter((r) => r),
+			roles: this.roleMentions.map((r) => this.channel instanceof Eris.GuildChannel ? this.channel.guild.roles.get(r) || null : null).filter(Boolean),
 			rolesRaw: this.roleMentions,
 			users: this.mentions,
 			usersRaw: this.mentions.map((u) => u.id),
-			members: this.mentions.map((m) => this.channel.guild.members.get(m.id) || null).filter((m) => m),
+			members: this.mentions.map((m) => this.channel instanceof Eris.GuildChannel  ? this.channel.guild.members.get(m.id) || null : null).filter(Boolean),
 			membersRaw: this.mentions.map((m) => m.id)
 		};
 	}
 
-	async load() {
+	async load(db: typeof Database) {
+		if (!(this.channel instanceof Eris.GuildChannel)) throw new TypeError("ExtendedMessage#load called on non-guild channel.");
 		const g = this.gConfig = await db.getGuild(this.channel.guild.id).then((v) => v.fix()) as GC,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			u = this.uConfig = await db.getUser(this.author.id).then((v) => v.fix()) as UC,
@@ -94,6 +95,7 @@ export default class ExtendedMessage<
 	}
 
 	async getMemberFromArgs(argPos = 0, useMentions = true, mentionPos = argPos): Promise<Eris.Member | null> {
+		if (!(this.channel instanceof Eris.GuildChannel)) throw new TypeError("ExtendedMessage#getMemberFromArgs called on non-guild channel.");
 		if (useMentions && this.mentionList.members[mentionPos]) return this.mentionList.members[mentionPos];
 		if (!this.args || !this.args[argPos]) return null;
 		const t = this.args[argPos].toLowerCase(),
@@ -113,6 +115,7 @@ export default class ExtendedMessage<
 	}
 
 	async getChannelFromArgs<T extends Eris.GuildChannel = Eris.TextChannel>(argPos = 0, useMentions = true, mentionPos = argPos): Promise<T | null> {
+		if (!(this.channel instanceof Eris.GuildChannel)) throw new TypeError("ExtendedMessage#getChannelFromArgs called on non-guild channel.");
 		if (useMentions && this.mentionList.channels[mentionPos]) return this.mentionList.channels[mentionPos] as T;
 		if (!this.args || !this.args[argPos]) return null;
 		const t = this.args[argPos].toLowerCase(),
@@ -128,6 +131,7 @@ export default class ExtendedMessage<
 	}
 
 	async getRoleFromArgs(argPos = 0, useMentions = true, mentionPos = argPos): Promise<Eris.Role | null> {
+		if (!(this.channel instanceof Eris.GuildChannel)) throw new TypeError("ExtendedMessage#getRoleFromArgs called on non-guild channel.");
 		if (useMentions && this.mentionList.roles[mentionPos]) return this.mentionList.roles[mentionPos];
 		if (!this.args || !this.args[argPos]) return null;
 		const t = this.args[argPos].toLowerCase(),

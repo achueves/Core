@@ -1,4 +1,4 @@
-
+import "source-map-support/register";
 import DatabaseTypes from "./src/@types/db";
 import DiscordTypes from "./src/@types/Discord";
 import * as Restrictions from "./src/cmd/Restrictions";

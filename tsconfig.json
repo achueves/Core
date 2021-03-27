@@ -2,7 +2,9 @@
     "extends": "@uwu-codes/tsconfig",
     "compilerOptions": {
         "outDir": "./build",
-        "baseUrl": "./src"
+        "baseUrl": "./src",
+        "declaration": true,
+        "sourceMap": true
     },
     "include": [
         "src/**/*"
