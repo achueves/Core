@@ -41,7 +41,7 @@ export default class ClientEvent<C extends ProvidedClient | ProvidedClientExtra>
 	constructor(event: "guildUpdate", listener: (this: C, guild: Guild, oldGuild: OldGuild) => void);
 	constructor(event: "hello", listener: (this: C, trace: Array<string>, id: number) => void);
 	constructor(event: "inviteCreate" | "inviteDelete", listener: (this: C, guild: Guild, invite: Invite) => void);
-	constructor(event: "messageCreate", listener: (this: C, message: Message) => void);
+	constructor(event: "messageCreate", listener: (this: C, message: Message, /* everything after this is added by us */ update?: boolean, slash?: boolean, slashInfo?: { id: string; token: string; }) => void);
 	constructor(event: "messageDelete" | "messageReactionRemoveAll", listener: (this: C, message: PossiblyUncachedMessage) => void);
 	constructor(event: "messageReactionRemoveEmoji", listener: (this: C, message: PossiblyUncachedMessage, emoji: PartialEmoji) => void);
 	constructor(event: "messageDeleteBulk", listener: (this: C, messages: Array<PossiblyUncachedMessage>) => void);
