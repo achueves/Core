@@ -30,21 +30,8 @@ export default class ExtendedMessage<
 		value: Array<string>;
 		keyValue: Record<string, string>;
 	};
-	constructor(msg: Eris.Message<Eris.TextableChannel>, client: C, slash?: boolean, slashInfo?: ExtendedMessage<C>["slashInfo"]) {
-		if (!("guild" in msg.channel)) return;
-		else {
-			super({
-				channel_id: msg.channel.id,
-				guild_id: msg.channel.guild.id,
-				mention_everyone: msg.mentionEveryone,
-				mention_roles: msg.roleMentions,
-				...msg,
-				mentions: msg.mentions.map((v) => v.id),
-				timestamp: new Date(msg.timestamp).toISOString()
-			}, getErisClient(client));
-		}
-
-
+	constructor(data: Eris.BaseData, client: C, slash?: boolean, slashInfo?: ExtendedMessage<C, UC, GC, CH>["slashInfo"]) {
+		super(data, getErisClient(client));
 		this.client = client;
 		this.slash = slash ?? false;
 		this.slashInfo = slashInfo ?? null;
