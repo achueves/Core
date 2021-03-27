@@ -50,6 +50,7 @@ export default class WebhookStore<C extends ProvidedClient = ProvidedClient, K e
 
 	addHook(name: K, info: WebhookConfig) {
 		this.webhooks.set(name, new Webhook<C>(this.client, info));
+		return this;
 	}
 
 	addBulk(list: Record<K, WebhookConfig>) {
@@ -59,6 +60,7 @@ export default class WebhookStore<C extends ProvidedClient = ProvidedClient, K e
 				new Webhook(this.client, info)
 			)
 		);
+		return this;
 	}
 
 	get(name: K) {
