@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/unified-signatures */
-import { ProvidedClient, ProvidedClientExtra } from "../@types/General";
+import { ProvidedClientExtra } from "../@types/General";
+import { ExtendedMessage, GuildConfig } from "../..";
+import UserConfig from "../db/Models/UserConfig";
 import {
 	Call, OldCall, AnyChannel, TextableChannel, GroupChannel,
 	User, OldGuildChannel, OldGroupChannel, FriendSuggestionReasons, Guild,
@@ -12,7 +14,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
 // @TODO FIND A WAY TO MAKE THIS NOT MANUAL
-export default class ClientEvent<C extends ProvidedClient | ProvidedClientExtra> {
+export default class ClientEvent<C extends ProvidedClientExtra, UC extends UserConfig = never, GC extends GuildConfig = never> {
 	// I've spent months hours trying to figure this out, these can stay like this
 	event: string;
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -41,7 +43,7 @@ export default class ClientEvent<C extends ProvidedClient | ProvidedClientExtra>
 	constructor(event: "guildUpdate", listener: (this: C, guild: Guild, oldGuild: OldGuild) => void);
 	constructor(event: "hello", listener: (this: C, trace: Array<string>, id: number) => void);
 	constructor(event: "inviteCreate" | "inviteDelete", listener: (this: C, guild: Guild, invite: Invite) => void);
-	constructor(event: "messageCreate", listener: (this: C, message: Message, /* everything after this is added by us */ update?: boolean, slash?: boolean, slashInfo?: { id: string; token: string; }) => void);
+	constructor(event: "messageCreate", listener: (this: C, message: Message /* everything after this is added by us */ | ExtendedMessage<C, UC, GC>, update?: boolean, slash?: boolean, slashInfo?: { id: string; token: string; }) => void);
 	constructor(event: "messageDelete" | "messageReactionRemoveAll", listener: (this: C, message: PossiblyUncachedMessage) => void);
 	constructor(event: "messageReactionRemoveEmoji", listener: (this: C, message: PossiblyUncachedMessage, emoji: PartialEmoji) => void);
 	constructor(event: "messageDeleteBulk", listener: (this: C, messages: Array<PossiblyUncachedMessage>) => void);
