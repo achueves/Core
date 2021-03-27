@@ -3,12 +3,12 @@ import db from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
-export default abstract class GuildConfig {
+export default abstract class GuildConfig<L extends string = string> {
 	private DEFAULTS: AnyObject;
 	id: string;
 	settings!: {
 		// this can't be hardcoded on this side due to the way Language works
-		lang: string;
+		lang: L;
 	};
 	prefix!: Array<string>;
 	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>, def: AnyObject) {
