@@ -3,16 +3,16 @@ import Database from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
-export default abstract class GuildConfig<L extends string = string, DB extends typeof Database = typeof Database> {
+export default abstract class GuildConfig<L extends string = string> {
 	private DEFAULTS: AnyObject;
-	private db: DB;
+	protected db: typeof Database;
 	id: string;
 	settings!: {
 		// this can't be hardcoded on this side due to the way Language works
 		lang: L;
 	};
 	prefix!: Array<string>;
-	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>, def: AnyObject, db: DB) {
+	constructor(id: string, data: MaybeId<ConfigDataTypes<GuildConfig, "id">>, def: AnyObject, db: typeof Database) {
 		if (def === undefined) throw new TypeError("No defaults provided");
 		if (db === undefined) throw new TypeError("Invalid database provided.");
 		this.id = id;
@@ -37,21 +37,11 @@ export default abstract class GuildConfig<L extends string = string, DB extends 
 		return this;
 	}
 
-	async mongoEdit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
+	async edit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const j = await this.db.collection<T>("guilds").findOneAndUpdate({ id: this.id } as any, d, opt);
 		await this.reload();
 		return j;
-	}
-
-	async edit(data: ConfigEditTypes<this, "id">) {
-		await this.db.collection("guilds").findOneAndUpdate({
-			id: this.id
-		}, {
-			$set: Utility.mergeObjects(data, this as AnyObject)
-		});
-
-		return this.reload();
 	}
 
 	async create() {

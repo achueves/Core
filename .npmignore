@@ -1,4 +1,4 @@
 test/
 .vscode/
-src/*
-!src/@types/*
+#src/*
+#!src/@types/*
