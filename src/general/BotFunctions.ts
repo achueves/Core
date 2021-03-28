@@ -2,10 +2,13 @@ import EmbedBuilder from "./EmbedBuilder";
 import defaultEmojis from "./defaultEmojis.json";
 import { Colors } from "./Constants";
 import Discord from "../@types/Discord";
-import { Category, Command } from "../..";
+import Category from "../cmd/Category";
 import { ProvidedClientExtra } from "../@types/General";
+import UserConfig from "../db/Models/UserConfig";
+import GuildConfig from "../db/Models/GuildConfig";
+import Command from "../cmd/Command";
 import Eris, { EmbedOptions } from "eris";
-import { AnyObject, ModuleImport, Variables } from "@uwu-codes/utils";
+import { AnyObject,  ModuleImport,  Variables } from "@uwu-codes/utils";
 import * as fs from "fs-extra";
 import * as https from "https";
 import path from "path";
@@ -137,14 +140,13 @@ export default class BotFunctions {
 	 * @param {string} dir - The directory to laod from.
 	 * @param {Category} cat - The category to add on to.
 	 * @memberof Internal
-	 * @example Internal.loadCommands("/opt/NPMBot/src/commands/developer", <Category>);
+	 * @example Internal.loadCommands("/opt/FurryBot/src/commands/developer", <Category>);
 	 */
-	static loadCommands<C extends ProvidedClientExtra>(dir: string, cat: Category<C>) {
+	static loadCommands<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(dir: string, cat: Category<C, UC, GC>) {
 		const ext = __filename.split(".").slice(-1)[0];
 		fs.readdirSync(dir).filter((f) => !fs.lstatSync(`${dir}/${f}`).isDirectory() && f.endsWith(ext) && f !== `index.${ext}`).map((f) => {
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
-			let c = require(`${dir}/${f}`) as ModuleImport<Category<C>> | Category<C>;
-			if ("default" in c) c = c.default;
+			const { default: c } = require(`${dir}/${f}`) as ModuleImport<Command<C, UC, GC>>;
 			if (c instanceof Command) cat.addCommand(c);
 			else throw new TypeError(`Invalid command in file "${path.resolve(`${dir}/${f}`)}"`);
 		});
