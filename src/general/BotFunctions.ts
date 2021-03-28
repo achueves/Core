@@ -1,12 +1,14 @@
 import EmbedBuilder from "./EmbedBuilder";
 import defaultEmojis from "./defaultEmojis.json";
 import { Colors } from "./Constants";
+import getErisClient from "./getErisClient";
 import Discord from "../@types/Discord";
 import Category from "../cmd/Category";
 import { ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
 import Command from "../cmd/Command";
+import { ExtendedMessage } from "..";
 import Eris, { EmbedOptions } from "eris";
 import { AnyObject,  ModuleImport,  Variables } from "@uwu-codes/utils";
 import * as fs from "fs-extra";
@@ -157,5 +159,64 @@ export default class BotFunctions {
 		})).reduce((a, b) => ({ ...a, ...b }), {}) as {
 			[K in keyof typeof Eris.Constants.UserFlags]: boolean;
 		};
+	}
+
+	/**
+	 * Extra argument parsing for some commands.
+	 *
+	 * @static
+	 * @param {ExtendedMessage} msg - The message instance.
+	 * @returns {string}
+	 * @memberof Internal
+	 * @example Internal.extraArgParsing(<ExtendedMessage>);
+	 */
+	static extraArgParsing<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(msg: ExtendedMessage<C, UC, GC>) {
+		let str = msg.args.join(" ");
+
+		(str
+			.split(" ")
+			// throw away mentions
+			.filter(k => !/(?:<@!?)([0-9]{15,21})>/i.exec(k))
+			.map(k => /([0-9]{15,21})/i.exec(k))
+			.filter(v => v !== null) as Array<RegExpExecArray>)
+			.map(([k, id]) => [k, `<@!${id}>`])
+			.map(([k, u]) => str = str.replace(k, u));
+
+		str
+			.split(" ")
+			// throw away mentions & ids
+			.filter(k => !/(?:<@!?)?([0-9]{15,21})>?/i.exec(k))
+			.map(v => [v, msg.channel.guild.members.find(m => Boolean(
+				m.username.toLowerCase() === v.toLowerCase() ||
+				m.tag.toLowerCase() === v.toLowerCase() ||
+				(m.nick && m.nick.toLowerCase() === v.toLowerCase())
+			))] as const)
+			.filter(([, v]) => v !== undefined)
+			.map(([k, u]) => str = str.replace(k, `<@!${u!.id}>`));
+
+		return str;
+	}
+
+	/**
+	 * Parsing for mention/id to username.
+	 *
+	 * @static
+	 * @param {ExtendedMessage} msg - The message instance.
+	 * @returns {string}
+	 * @memberof Internal
+	 * @example Internal.mentionOrIdToUsername(<ExtendedMessage>);
+	 */
+	static mentionOrIdToUsername<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(msg: ExtendedMessage<C, UC, GC>) {
+		let str = msg.args.join(" ");
+
+		(str
+			.split(" ")
+			.map(k => /(?:<@!?)?([0-9]{15,21})>?/i.exec(k))
+			.filter(v => v !== null) as Array<RegExpExecArray>)
+			.map(([k, id]) => [k, (getErisClient(msg.client).users.get(id) || msg.channel.guild.members.get(id))?.username])
+			.filter(([, v]) => v !== undefined)
+			.map(([k, u]) => str = str.replace(k!, u!));
+
+		return str;
 	}
 }
