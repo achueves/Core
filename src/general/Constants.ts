@@ -22,10 +22,9 @@ export const Colors = {
 	cyan: 0x00FFFF,
 	teal: 0x008080,
 	blue: 0x0000FF,
-	get random() {
-		return Math.floor(Math.random() * 0xFFFFFF);
-	},
+	random: () => Math.floor(Math.random() * 0xFFFFFF),
 	Full: FullColors,
+	furry: 0xB86220,
 	npm: 0xCB3837
 };
 
