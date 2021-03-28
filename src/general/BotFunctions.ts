@@ -142,8 +142,7 @@ export default class BotFunctions {
 	 * @memberof Internal
 	 * @example Internal.loadCommands("/opt/FurryBot/src/commands/developer", <Category>);
 	 */
-	static loadCommands<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(dir: string, cat: Category<C, UC, GC>) {
-		const ext = __filename.split(".").slice(-1)[0];
+	static loadCommands<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(dir: string, cat: Category<C, UC, GC>, ext = __filename.split(".").slice(-1)[0]) {
 		fs.readdirSync(dir).filter((f) => !fs.lstatSync(`${dir}/${f}`).isDirectory() && f.endsWith(ext) && f !== `index.${ext}`).map((f) => {
 			// eslint-disable-next-line @typescript-eslint/no-var-requires
 			const { default: c } = require(`${dir}/${f}`) as ModuleImport<Command<C, UC, GC>>;
