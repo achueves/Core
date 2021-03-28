@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/unified-signatures */
+import ExtendedMessage from "./ExtendedMessage";
 import { ProvidedClientExtra } from "../@types/General";
-import { ExtendedMessage, GuildConfig } from "../..";
 import UserConfig from "../db/Models/UserConfig";
+import GuildConfig from "../db/Models/GuildConfig";
 import Eris, {
 	Call, OldCall, AnyChannel, TextableChannel, GroupChannel,
 	User, OldGuildChannel, OldGroupChannel, FriendSuggestionReasons, Guild,
