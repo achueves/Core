@@ -82,11 +82,18 @@ abstract class Database {
 		return this.connection?.isConnected?.() ?? false;
 	}
 	static get Redis() {
-		if (this.connection === undefined) throw new ReferenceError("Attempted redis access without proper initialization.");
+		if (this.r === undefined) throw new ReferenceError("Attempted redis access without proper initialization.");
 		return this.r;
 	}
+
 	static get ready() {
-		return !(this.connection === undefined || this.r === undefined);
+		return this.dbReady && this.redisReady;
+	}
+	static get dbReady() {
+		return this.connection !== undefined;
+	}
+	static get redisReady() {
+		return this.r !== undefined;
 	}
 
 	static getUser: (id: string) => Promise<UserConfig>;
