@@ -32,33 +32,39 @@ abstract class Database {
 	}
 
 	static init(db: DBOptions, redis: RedisOptions) {
-		this.mainDB = db.main;
+		this.initDb(db);
+		this.initRedis(redis);
+	}
 
-		const r = this.r = new IORedis(redis.port, redis.host, {
-			password: redis.password,
-			db: redis.db,
-			enableReadyCheck: true,
-			autoResendUnfulfilledCommands: true,
-			connectionName: redis.name
-		});
-
-		r
-			.on("connect", () => console.debug("Redis", `Connected to redis://${redis.host}:${redis.port} (db: ${redis.db})`));
-
-		const dbString = `mongodb://${db.host}:${db.port}?retryWrites=true&w=majority`;
+	static initDb({ host, port, options, main }: DBOptions) {
+		this.mainDB = main;
+		const dbString = `mongodb://${host}:${port}?retryWrites=true&w=majority`;
 		try {
 			const t = new Timers(false);
 			t.start("connect");
-			console.debug("Database", `Connecting to ${dbString} (SSL: ${db.options.ssl ? "Yes" : "No"})`);
+			console.debug("Database", `Connecting to ${dbString} (SSL: ${options.ssl ? "Yes" : "No"})`);
 			// eslint-disable-next-line @typescript-eslint/unbound-method
-			this.connection = deasync(MongoClient.connect)(dbString, db.options) as MongoClient;
+			this.connection = deasync(MongoClient.connect)(dbString, options) as MongoClient;
 			t.end("connect");
-			console.debug("Database", `Connected to ${dbString} (SSL: ${db.options.ssl ? "Yes" : "No"}) in ${t.calc("connect")}ms`);
+			console.debug("Database", `Connected to ${dbString} (SSL: ${options.ssl ? "Yes" : "No"}) in ${t.calc("connect")}ms`);
 		} catch (e) {
 			// eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-			console.error("Database", `Error connecting to MongoDB instance (${dbString}, SSL: ${db.options.ssl ? "Yes" : "No"})\nReason: ${"stack" in e ? (e as { stack: string; }).stack : e}`);
+			console.error("Database", `Error connecting to MongoDB instance (${dbString}, SSL: ${options.ssl ? "Yes" : "No"})\nReason: ${"stack" in e ? (e as { stack: string; }).stack : e}`);
 			return; // don't need to rethrow it as it's already logged
 		}
+	}
+
+	static initRedis({ host, port, password, db, name }: RedisOptions) {
+		const r = this.r = new IORedis(port, host, {
+			password,
+			db,
+			enableReadyCheck: true,
+			autoResendUnfulfilledCommands: true,
+			connectionName: name
+		});
+
+		r
+			.on("connect", () => console.debug("Redis", `Connected to redis://${host}:${port} (db: ${db})`));
 	}
 
 	static collection<T = unknown>(col: string): Collection<T> {
@@ -66,6 +72,7 @@ abstract class Database {
 	}
 
 	static get mongo() {
+		if (this.connection === undefined) throw new ReferenceError("Attempted database access without proper initialization.");
 		return this.connection;
 	}
 	static get mdb() {
@@ -75,15 +82,15 @@ abstract class Database {
 		return this.connection?.isConnected?.() ?? false;
 	}
 	static get Redis() {
+		if (this.connection === undefined) throw new ReferenceError("Attempted redis access without proper initialization.");
 		return this.r;
+	}
+	static get ready() {
+		return !(this.connection === undefined || this.r === undefined);
 	}
 
 	static getUser: (id: string) => Promise<UserConfig>;
 	static getGuild: (id: string) => Promise<GuildConfig>;
-
-	static isDb(value: unknown): value is Database {
-		return value instanceof Database;
-	}
 }
 
 export default Database;
