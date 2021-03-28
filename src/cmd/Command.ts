@@ -25,7 +25,7 @@ export default class Command<C extends ProvidedClientExtra, UC extends UserConfi
 	donatorCooldown: number;
 	category: Category<C, UC, GC>;
 	hasSlashVariant: boolean;
-	run: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>) => Promise<void>;
+	run: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>) => Promise<unknown>;
 	// allow isn't used right now but it can be a bypass system in the future
 	overrides:
 	{

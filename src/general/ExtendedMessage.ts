@@ -30,6 +30,8 @@ export default class ExtendedMessage<
 		value: Array<string>;
 		keyValue: Record<string, string>;
 	};
+	// thanks Eris
+	channel!: Omit<CH, "guild"> & { guild: Eris.Guild; };
 	constructor(data: Eris.BaseData, client: C, slash?: boolean, slashInfo?: ExtendedMessage<C, UC, GC, CH>["slashInfo"]) {
 		super(data, getErisClient(client));
 		this.client = client;

@@ -18,7 +18,7 @@ export default class ExtraHandlers<C extends ProvidedClientExtra, UC extends Use
 			userMissing: Array<ErisPermissions> = [],
 			botMissing: Array<ErisPermissions> = [];
 
-		if (!developers.includes(msg.author.id)) for (const perm of cmd.permissions.user) if (!msg.member!.permissions.has(perm)) userMissing.push(perm);
+		if (!developers.includes(msg.author.id)) for (const perm of cmd.permissions.user) if (!msg.member.permissions.has(perm)) userMissing.push(perm);
 		for (const perm of cmd.permissions.bot) if (!bot.permissions.has(perm)) botMissing.push(perm);
 
 		if (userMissing.length > 0) {
