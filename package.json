@@ -1,6 +1,6 @@
 {
   "name": "@uwu-codes/core",
-  "version": "1.0.67",
+  "version": "1.0.68",
   "description": "A core library for my bots.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -9,7 +9,7 @@
     "build": "rm -rf build && npm run lint && tsc && npm run copy && echo Build Finished",
     "lint": "eslint src --ext .ts --fix",
     "circ": "dpdm --tree=false --circular=true --warning=false -T .",
-    "copy": "cp -r src/@types build"
+    "copy": "cp -r src/@types build && cp src/general/EvalUtil.d.ts build/general"
   },
   "author": "Donovan_DMC",
   "license": "MIT",
@@ -31,6 +31,7 @@
     "fs-extra": "^9.1.0",
     "ioredis": "^4.24.5",
     "json5": "^2.2.0",
+    "language": "npm:@uwu-codes/language@^1.0.1",
     "mongodb": "^3.6.5",
     "source-map-support": "^0.5.19"
   },

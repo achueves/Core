@@ -1,18 +1,17 @@
-import Language from "./Language";
+import Language from "language";
 import Eris from "eris";
 
 export default class EmbedBuilder<L extends string = string> {
 	private lang: L;
 	private json: Eris.EmbedOptions;
-	private langObj: Language<L> | null;
-	constructor(lang: L, langObj?: Language<L>) {
+	constructor(lang: L, json?: Eris.EmbedOptions) {
 		this.lang = lang;
-		this.json = {};
-		this.langObj = langObj ?? null;
+		this.json = json ??{};
 	}
 
 	private formatString(str: string) {
-		return this.langObj ? this.langObj.parseString(this.lang, str) : str;
+		if (Language.DIR === null) return str;
+		return Language.parseString<L>(this.lang, str);
 	}
 
 	getTitle() {

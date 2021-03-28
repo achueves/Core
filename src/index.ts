@@ -25,7 +25,6 @@ import defaultEmojis from "./general/defaultEmojis.json";
 import EmbedBuilder from "./general/EmbedBuilder";
 import EvalUtil from "./general/EvalUtil";
 import ExtendedMessage from "./general/ExtendedMessage";
-import Language from "./general/Language";
 import MessageCollector from "./general/MessageCollector";
 import MonkeyPatch from "./general/MonkeyPatch";
 import WebhookStore from "./general/WebhookStore";
@@ -36,8 +35,8 @@ export {
 	Command, CommandError, CommandHandler, CooldownHandler, ExtraHandlers,
 	GuildConfig, UserConfig, Database, BotFunctions, ClientEvent,
 	FullColors, Constants, defaultEmojis, EmbedBuilder, EvalUtil,
-	ExtendedMessage, Language, MessageCollector, MonkeyPatch, WebhookStore,
-	GeneralTypes, ConfigDataTypes, ConfigEditTypes, MaybeId, Oauth2Token,
-	APISelfUser, ErisPermissions, CommandRestrictions, CategoryRestrictions, ProvidedClient,
-	ProvidedClientExtra, ConfigLike
+	ExtendedMessage,  MessageCollector, MonkeyPatch, WebhookStore, GeneralTypes,
+	ConfigDataTypes, ConfigEditTypes, MaybeId, Oauth2Token, APISelfUser,
+	ErisPermissions, CommandRestrictions, CategoryRestrictions, ProvidedClient, ProvidedClientExtra,
+	ConfigLike
 };
