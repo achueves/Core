@@ -3,7 +3,7 @@ import Database from "..";
 import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
-export default abstract class UserConfig<DB extends typeof Database = never> {
+export default abstract class UserConfig<DB extends typeof Database = typeof Database> {
 	private DEFAULTS: AnyObject;
 	private db: DB;
 	id: string;
