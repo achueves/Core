@@ -1,13 +1,14 @@
 {
   "name": "@uwu-codes/core",
-  "version": "1.0.52",
+  "version": "1.0.55",
   "description": "A core library for my bots.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
     "prepublishOnly": "rm -rf build && npm run lint && tsc && echo Build Finished",
     "build": "npm run prepare",
-    "lint": "eslint src --ext .ts --fix"
+    "lint": "eslint src --ext .ts --fix",
+    "circ": "dpdm --tree=false --circular=true --warning=false -T ."
   },
   "author": "Donovan_DMC",
   "license": "MIT",
