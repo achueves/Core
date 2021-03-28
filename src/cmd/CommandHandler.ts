@@ -5,27 +5,29 @@ import ExtraHandlers from "./ExtraHandlers";
 import CooldownHandler from "./CooldownHandler";
 import AntiSpam from "./AntiSpam";
 import { ProvidedClientExtra } from "../@types/General";
+import UserConfig from "../db/Models/UserConfig";
+import GuildConfig from "../db/Models/GuildConfig";
 import { ArrayOneOrMore, ModuleImport } from "@uwu-codes/utils";
 import path from "path";
 
 
-export default class CommandHandler<C extends ProvidedClientExtra> {
-	categories: Array<Category<C>>;
-	handlers: ExtraHandlers<C>;
-	cool: CooldownHandler<C>;
+export default class CommandHandler<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> {
+	categories: Array<Category<C, UC, GC>>;
+	handlers: ExtraHandlers<C, UC, GC>;
+	cool: CooldownHandler<C, UC, GC>;
 	anti: AntiSpam;
 	constructor() {
 		this.categories = [];
-		this.handlers = new ExtraHandlers<C>();
-		this.cool = new CooldownHandler<C>();
+		this.handlers = new ExtraHandlers<C, UC, GC>();
+		this.cool = new CooldownHandler<C, UC, GC>();
 		this.anti = new AntiSpam();
 	}
 	get restrictions() {
 		return Restrictions;
 	}
 
-	get commands(): Array<Command<C>> {
-		return [...this.categories.reduce((a, b) => a.concat(b.commands), [] as Array<Command<C>>)];
+	get commands(): Array<Command<C, UC, GC>> {
+		return [...this.categories.reduce((a, b) => a.concat(b.commands), [] as Array<Command<C, UC, GC>>)];
 	}
 
 	get triggers(): Array<ArrayOneOrMore<string>> {
@@ -41,7 +43,7 @@ export default class CommandHandler<C extends ProvidedClientExtra> {
 		return this.categories.find((c) => c.name === data) || null;
 	}
 
-	addCategory(data: Category<C>) {
+	addCategory(data: Category<C, UC, GC>) {
 		if (!data) throw new TypeError("Missing category.");
 		if (this.categoryNames.includes(data.name)) throw new TypeError(`Duplicate category "${data.name}" in file "${data.file}" (duplicate: ${this.categories.find((c) => c.name === data.name)!.file})`);
 		for (const cmd of data.commands) {
@@ -56,7 +58,7 @@ export default class CommandHandler<C extends ProvidedClientExtra> {
 		return true;
 	}
 
-	removeCategory(data: Category<C> | string) {
+	removeCategory(data: Category<C, UC, GC> | string) {
 		if (!data) throw new TypeError("Missing category.");
 		if (typeof data === "string") data = this.categories.find((c) => c.name === data)!;
 		if (!data || !this.categories.includes(data)) return false;
@@ -65,7 +67,7 @@ export default class CommandHandler<C extends ProvidedClientExtra> {
 		return true;
 	}
 
-	getCommand(data: Command<C> | string) {
+	getCommand(data: Command<C, UC, GC> | string) {
 		if (!data) throw new TypeError("Missing command.");
 		const cmd = this.commands.find((c) => c.triggers.some((t) => data instanceof Command ? data.triggers.includes(t) : data === t));
 
@@ -82,7 +84,7 @@ export default class CommandHandler<C extends ProvidedClientExtra> {
 		};
 	}
 
-	reloadCategory(cat: string | Category<C>) {
+	reloadCategory(cat: string | Category<C, UC, GC>) {
 		if (typeof cat !== "string") cat = cat.name;
 
 		const c = this.getCategory(cat);
@@ -95,7 +97,7 @@ export default class CommandHandler<C extends ProvidedClientExtra> {
 			.map((f) => delete require.cache[require.resolve(f)]);
 
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const f = (require(c.file) as ModuleImport<Category<C>>).default;
+		const f = (require(c.file) as ModuleImport<Category<C, UC, GC>>).default;
 
 		this.addCategory(f);
 

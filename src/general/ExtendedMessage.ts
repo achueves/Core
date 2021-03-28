@@ -24,7 +24,7 @@ export default class ExtendedMessage<
 	gConfig!: GC;
 	uConfig!: UC;
 	args!: Array<string>;
-	cmd!: Command<C> | null;
+	cmd!: Command<C, UC, GC> | null;
 	prefix!: string;
 	dashedArgs!: {
 		value: Array<string>;

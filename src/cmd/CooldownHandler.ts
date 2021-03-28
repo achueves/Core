@@ -1,7 +1,9 @@
 import Command from "./Command";
 import { ProvidedClientExtra } from "../@types/General";
+import UserConfig from "../db/Models/UserConfig";
+import GuildConfig from "../db/Models/GuildConfig";
 
-export default class CooldownHandler<C extends ProvidedClientExtra> {
+export default class CooldownHandler<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> {
 	private cooldowns: Array<{
 		command: string;
 		start: number;
@@ -12,7 +14,7 @@ export default class CooldownHandler<C extends ProvidedClientExtra> {
 		this.cooldowns = [];
 	}
 
-	addCooldown(userId: string, command: Command<C>) {
+	addCooldown(userId: string, command: Command<C, UC, GC>) {
 		console.debug("CooldownHandler", `Set cooldown for user "${userId}" on command ${command.triggers[0]} for ${command.cooldown}ms.`);
 		const start = Date.now();
 		this.cooldowns.push({
@@ -24,7 +26,7 @@ export default class CooldownHandler<C extends ProvidedClientExtra> {
 		return start;
 	}
 
-	checkCooldown(userId: string, command: Command<C>) {
+	checkCooldown(userId: string, command: Command<C, UC, GC>) {
 		const d = Date.now(),
 			e = this.cooldowns.find((c) => c.userId === userId && c.command === command.triggers[0]),
 			time = Math.round(!e ? 0 : (e.start + e.time) - d);
@@ -43,7 +45,7 @@ export default class CooldownHandler<C extends ProvidedClientExtra> {
 		};
 	}
 
-	removeCooldown(userId: string, command: Command<C>) {
+	removeCooldown(userId: string, command: Command<C, UC, GC>) {
 		console.debug("CooldownHandler", `Removed cooldown for user "${userId}" on command ${command.triggers[0]}`);
 		const e = this.cooldowns.find((c) => c.userId === userId && c.command === command.triggers[0]);
 		if (!e) return false;

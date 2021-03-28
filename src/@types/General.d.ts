@@ -1,5 +1,5 @@
 import "node";
-import { CommandHandler } from "../..";
+import CommandHandler from "../cmd/CommandHandler";
 import Eris from "eris";
 import { KnownKeys } from "@uwu-codes/utils";
 import { BaseClusterWorker } from "eris-fleet";
@@ -14,7 +14,7 @@ declare namespace General {
 	type ProvidedClientExtra = ProvidedClient & {
 		// fuck you
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		cmd: CommandHandler<any>;
+		cmd: CommandHandler<any, any, any>;
 		getUser?(id: string): Promise<Eris.User | null>;
 		getGuild?(id: string): Promise<Eris.Guild | null>;
 		typing?: Record<string, NodeJS.Timeout>;

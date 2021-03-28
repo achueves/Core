@@ -3,12 +3,14 @@ import Category from "./Category";
 import CommandError from "./CommandError";
 import ExtendedMessage from "../general/ExtendedMessage";
 import { CommandRestrictions, ErisPermissions, ProvidedClientExtra } from "../@types/General";
+import UserConfig from "../db/Models/UserConfig";
+import GuildConfig from "../db/Models/GuildConfig";
 import { ArrayOneOrMore } from "@uwu-codes/utils";
 import path from "path";
 
 type OverrideReturn = void | "DEFAULT";
 
-export default class Command<C extends ProvidedClientExtra> {
+export default class Command<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> {
 	triggers: ArrayOneOrMore<string>;
 	permissions: {
 		bot: Array<ErisPermissions>;
@@ -21,18 +23,18 @@ export default class Command<C extends ProvidedClientExtra> {
 	description: string;
 	cooldown: number;
 	donatorCooldown: number;
-	category: Category<C>;
+	category: Category<C, UC, GC>;
 	hasSlashVariant: boolean;
-	run: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<void>;
+	run: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>) => Promise<void>;
 	// allow isn't used right now but it can be a bypass system in the future
 	overrides:
 	{
-		permissionError: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, type: "user" | "bot", permissions: Array<ErisPermissions>) => Promise<OverrideReturn> | OverrideReturn;
-		invalidUsage: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<C>) => Promise<OverrideReturn> | OverrideReturn;
-		help: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn> | OverrideReturn;
-		cooldown: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>, time: number) => Promise<OverrideReturn> | OverrideReturn;
+		permissionError: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>, type: "user" | "bot", permissions: Array<ErisPermissions>) => Promise<OverrideReturn> | OverrideReturn;
+		invalidUsage: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>, err: CommandError<C, UC, GC>) => Promise<OverrideReturn> | OverrideReturn;
+		help: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>) => Promise<OverrideReturn> | OverrideReturn;
+		cooldown: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>, time: number) => Promise<OverrideReturn> | OverrideReturn;
 	} & {
-		[k in CommandRestrictions]: (this: C, msg: ExtendedMessage<C>, cmd: Command<C>) => Promise<OverrideReturn> | OverrideReturn;
+		[k in CommandRestrictions]: (this: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>) => Promise<OverrideReturn> | OverrideReturn;
 	};
 	file: string;
 	constructor(triggers: ArrayOneOrMore<string>, file: string) {
@@ -75,70 +77,70 @@ export default class Command<C extends ProvidedClientExtra> {
 		return `${path.dirname(this.file).replace(/build(\\|\/)/, "")}/${path.basename(this.file).replace(/.js/, ".ts")}`;
 	}
 
-	setTriggers(data: Command<C>["triggers"]) {
+	setTriggers(data: Command<C, UC, GC>["triggers"]) {
 		if (!data) throw new TypeError("One or more triggers must be provided.");
 		this.triggers = data;
 		return this;
 	}
 
-	setBotPermissions(data: Command<C>["permissions"]["bot"], data2?: Command<C>["permissions"]["botUseful"]) {
+	setBotPermissions(data: Command<C, UC, GC>["permissions"]["bot"], data2?: Command<C, UC, GC>["permissions"]["botUseful"]) {
 		this.permissions.bot = data || [];
 		this.permissions.botUseful = data2 || [];
 		return this;
 	}
 
-	setUserPermissions(data: Command<C>["permissions"]["user"]) {
+	setUserPermissions(data: Command<C, UC, GC>["permissions"]["user"]) {
 		this.permissions.user = data || [];
 		return this;
 	}
 
-	setPermissions(data: Command<C>["permissions"]["bot"], data2: Command<C>["permissions"]["botUseful"], data3: Command<C>["permissions"]["user"]) {
+	setPermissions(data: Command<C, UC, GC>["permissions"]["bot"], data2: Command<C, UC, GC>["permissions"]["botUseful"], data3: Command<C, UC, GC>["permissions"]["user"]) {
 		this.setBotPermissions(data || this.permissions.bot, data2 || this.permissions.botUseful);
 		this.setUserPermissions(data3 || this.permissions.user);
 	}
 
-	setRestrictions(data: Command<C>["restrictions"]) {
+	setRestrictions(data: Command<C, UC, GC>["restrictions"]) {
 		this.restrictions = data ?? [];
 		return this;
 	}
 
-	setUsage(data: Command<C>["usage"]) {
+	setUsage(data: Command<C, UC, GC>["usage"]) {
 		this.usage = data;
 		return this;
 	}
 
-	setDescription(data: Command<C>["description"]) {
+	setDescription(data: Command<C, UC, GC>["description"]) {
 		this.description = data;
 		return this;
 	}
 
-	setCooldown(data: Command<C>["cooldown"], donatorSame = true) {
+	setCooldown(data: Command<C, UC, GC>["cooldown"], donatorSame = true) {
 		this.cooldown = data;
 		if (donatorSame) this.donatorCooldown = data;
 		return this;
 	}
 
-	setDonatorCooldown(data: Command<C>["donatorCooldown"]) {
+	setDonatorCooldown(data: Command<C, UC, GC>["donatorCooldown"]) {
 		this.donatorCooldown = data;
 		return this;
 	}
 
-	setCategory(data: Category<C>) {
+	setCategory(data: Category<C, UC, GC>) {
 		this.category = data;
 		return this;
 	}
 
-	setExecutor(data: Command<C>["run"]) {
+	setExecutor(data: Command<C, UC, GC>["run"]) {
 		this.run = data;
 		return this;
 	}
 
-	setOverride<K extends keyof Command<C>["overrides"]>(type: K, override: Command<C>["overrides"][K]) {
+	setOverride<K extends keyof Command<C, UC, GC>["overrides"]>(type: K, override: Command<C, UC, GC>["overrides"][K]) {
 		this.overrides[type] = override;
 		return this;
 	}
 
-	runOverride<K extends keyof Command<C>["overrides"]>(type: K, client: C, ...args: (Parameters<Command<C>["overrides"][K]>)): OverrideReturn | Promise<OverrideReturn> {
+	runOverride<K extends keyof Command<C, UC, GC>["overrides"]>(type: K, client: C, ...args: (Parameters<Command<C, UC, GC>["overrides"][K]>)): OverrideReturn | Promise<OverrideReturn> {
 		// this shit is too complicated
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore

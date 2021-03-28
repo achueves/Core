@@ -1,14 +1,16 @@
 import Category from "./Category";
 import Command from "./Command";
 import { ProvidedClientExtra } from "../@types/General";
+import UserConfig from "../db/Models/UserConfig";
+import GuildConfig from "../db/Models/GuildConfig";
 import { Strings } from "@uwu-codes/utils";
 
-export default class CommandError<C extends ProvidedClientExtra> extends Error {
-	cmd: Command<C>;
+export default class CommandError<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> extends Error {
+	cmd: Command<C, UC, GC>;
 	// defined in super
 	message!: "INVALID_USAGE";
 	extra: string;
-	constructor(type: "INVALID_USAGE", cmd: Command<C>, extra?: string) {
+	constructor(type: "INVALID_USAGE", cmd: Command<C, UC, GC>, extra?: string) {
 		super(type);
 		this.name = "CommandError";
 		this.cmd = cmd;
@@ -16,10 +18,10 @@ export default class CommandError<C extends ProvidedClientExtra> extends Error {
 	}
 }
 
-export class ReloadError<T extends ("command" | "category"), C extends ProvidedClientExtra> extends Error {
+export class ReloadError<T extends ("command" | "category"), C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> extends Error {
 	type: T;
-	info: T extends "command" ? Command<C> : Category<C>;
-	constructor(message: string, type: T, info: ReloadError<T, C>["info"]) {
+	info: T extends "command" ? Command<C, UC, GC> : Category<C, UC, GC>;
+	constructor(message: string, type: T, info: ReloadError<T, C, UC, GC>["info"]) {
 		super(message);
 		this.name = `ReloadError[${Strings.ucwords(type)}]`;
 		this.type = type;

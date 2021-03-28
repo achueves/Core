@@ -7,10 +7,12 @@ import ExtendedMessage from "../general/ExtendedMessage";
 import { Colors } from "../general/Constants";
 import { ErisPermissions, ProvidedClientExtra } from "../@types/General";
 import getErisClient from "../general/getErisClient";
+import UserConfig from "../db/Models/UserConfig";
+import GuildConfig from "../db/Models/GuildConfig";
 import { Time } from "@uwu-codes/utils";
 
-export default class ExtraHandlers<C extends ProvidedClientExtra> {
-	async checkPermissions(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, developers: Array<string>) {
+export default class ExtraHandlers<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> {
+	async checkPermissions(client: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>, developers: Array<string>) {
 		if (!("guild" in msg.channel)) return;
 		const bot = msg.channel.guild.me,
 			userMissing: Array<ErisPermissions> = [],
@@ -60,7 +62,7 @@ export default class ExtraHandlers<C extends ProvidedClientExtra> {
 		return true;
 	}
 
-	async runHelp(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, Language: Lang) {
+	async runHelp(client: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>, Language: Lang) {
 		const v = await cmd.runOverride("help", client, msg, cmd);
 
 		if (v === "DEFAULT") {
@@ -106,11 +108,9 @@ export default class ExtraHandlers<C extends ProvidedClientExtra> {
 		return true;
 	}
 
-	async runInvalidUsage(client: C, msg: ExtendedMessage<C>, cmd: Command<C>, err: CommandError<C>, Language: Lang) {
+	async runInvalidUsage(client: C, msg: ExtendedMessage<C, UC, GC>, cmd: Command<C, UC, GC>, err: CommandError<C, UC, GC>, Language: Lang) {
 		// remove cooldown on invalid usage
-		// constraint bs
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		client.cmd.cool.removeCooldown(msg.author.id, cmd);
 		const v = await cmd.runOverride("invalidUsage", client, msg, cmd, err);
 
