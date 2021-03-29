@@ -70,7 +70,7 @@ export default class ExtraHandlers<C extends ProvidedClientExtra, UC extends Use
 			await msg.channel.createMessage({
 				embed: new EmbedBuilder(msg.gConfig.settings.lang)
 					.setAuthor(msg.author.tag, msg.author.avatarURL)
-					.setTitle("\u274c {lang:other.words.command$ucwords$} {lang:other.words.help$ucwords$}")
+					.setTitle("{lang:other.commandChecks.invaidUsage.title")
 					.setDescription([
 						"**{lang:other.words.info$ucwords$}**",
 						"**{lang:other.words.restrictions$ucwords$}**",
