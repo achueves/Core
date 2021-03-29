@@ -32,7 +32,15 @@ export default abstract class UserConfig {
 		return this;
 	}
 
-	async edit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
+	async edit<T = ConfigEditTypes<this>>(d: T, opt?: FindOneAndUpdateOption<T>) {
+		await this.mongoEdit({
+			$set: d,
+			...(opt ?? {})
+		});
+		return this;
+	}
+
+	async mongoEdit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const j = await this.db.collection<T>("users").findOneAndUpdate({ id: this.id } as any, d, opt);
 		await this.reload();
