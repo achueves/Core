@@ -1,6 +1,6 @@
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
 import Database from "..";
-import { UpdateQuery, FindOneAndUpdateOption } from "mongodb";
+import { UpdateQuery, FindOneAndUpdateOption, MatchKeysAndValues } from "mongodb";
 import { AnyObject, Utility } from "@uwu-codes/utils";
 
 export default abstract class UserConfig {
@@ -32,7 +32,7 @@ export default abstract class UserConfig {
 		return this;
 	}
 
-	async edit<T = ConfigEditTypes<this>>(d: T, opt?: FindOneAndUpdateOption<T>) {
+	async edit<T = ConfigEditTypes<this>>(d: MatchKeysAndValues<T>, opt?: FindOneAndUpdateOption<T>) {
 		await this.mongoEdit({
 			$set: d,
 			...(opt ?? {})

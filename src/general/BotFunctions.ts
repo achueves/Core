@@ -155,7 +155,7 @@ export default class BotFunctions {
 
 	static getUserFlags(user: Eris.User) {
 		return Object.entries(Eris.Constants.UserFlags).map(([f, v]) => ({
-			[f]: ((user.publicFlags ?? 0) & v) !== 0
+			[f]: ((user.publicFlags ?? 0) & v) === v
 		})).reduce((a, b) => ({ ...a, ...b }), {}) as {
 			[K in keyof typeof Eris.Constants.UserFlags]: boolean;
 		};
