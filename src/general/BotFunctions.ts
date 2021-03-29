@@ -161,6 +161,14 @@ export default class BotFunctions {
 		};
 	}
 
+	static getMessageFlags(msg: Eris.Message) {
+		return Object.entries(Eris.Constants.MessageFlags).map(([f, v]) => ({
+			[f]: ((msg.flags ?? 0) & v) === v
+		})).reduce((a, b) => ({ ...a, ...b }), {}) as {
+			[K in keyof typeof Eris.Constants.MessageFlags]: boolean;
+		};
+	}
+
 	/**
 	 * Extra argument parsing for some commands.
 	 *
