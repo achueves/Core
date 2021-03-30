@@ -8,6 +8,7 @@ import { ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
 import { ArrayOneOrMore, ModuleImport } from "@uwu-codes/utils";
+import Logger from "logger";
 import path from "path";
 
 
@@ -53,7 +54,7 @@ export default class CommandHandler<C extends ProvidedClientExtra, UC extends Us
 		}
 
 
-		console.debug(["Command Handler"], `Added the category ${data.name} with ${data.commands.length} command${data.commands.length === 1 ? "" : "s"}.`);
+		Logger.debug(["Command Handler"], `Added the category ${data.name} with ${data.commands.length} command${data.commands.length === 1 ? "" : "s"}.`);
 		this.categories.push(data);
 		return true;
 	}
@@ -62,7 +63,7 @@ export default class CommandHandler<C extends ProvidedClientExtra, UC extends Us
 		if (!data) throw new TypeError("Missing category.");
 		if (typeof data === "string") data = this.categories.find((c) => c.name === data)!;
 		if (!data || !this.categories.includes(data)) return false;
-		console.debug(["Command Handler"], `Remove the category ${data.name}.`);
+		Logger.debug(["Command Handler"], `Remove the category ${data.name}.`);
 		this.categories.splice(this.categories.indexOf(data), 1);
 		return true;
 	}
