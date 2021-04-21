@@ -9,11 +9,11 @@ import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
 import Command from "../cmd/Command";
 import { ExtendedMessage } from "..";
-import Eris, { EmbedOptions } from "eris";
+import Eris, { EmbedOptions, Role } from "eris";
 import { AnyObject,  ModuleImport,  Variables } from "@uwu-codes/utils";
 import * as fs from "fs-extra";
-import * as https from "https";
-import path from "path";
+import * as https from "node:https";
+import path from "node:path";
 
 export default class BotFunctions {
 	private constructor() {
@@ -26,11 +26,11 @@ export default class BotFunctions {
 	 * @static
 	 * @param {string} code - The code of the authorization.
 	 * @param {string} [redirectURL] - The redirect URL used.
-	 * @returns {Promise<Discord.Oauth2Token>}
-	 * @memberof Internal
-	 * @example Internal.authorizeOAuth("someCodeFromDiscord, "clientId", "clientSecret", "https://example.com", ["bot]");
+	 * @returns {Promise<Discord.Oauth2Info>}
+	 * @memberof BotFunctions
+	 * @example BotFunctions.authorizeOAuth("someCodeFromDiscord, "clientId", "clientSecret", "https://example.com", ["bot]");
 	 */
-	static async authorizeOAuth(code: string, clientId: string, clientSecret: string, redirectURL: string, scopes: Array<string>): Promise<Discord.Oauth2Token> {
+	static async authorizeOAuth(code: string, clientId: string, clientSecret: string, redirectURL: string, scopes: Array<string>): Promise<Discord.Oauth2Info> {
 		return new Promise((a, b) => {
 			const req = https.request({
 				method: "GET",
@@ -59,16 +59,55 @@ export default class BotFunctions {
 	 * @static
 	 * @param {string} auth - The bearer token.
 	 * @returns
-	 * @memberof Internal
-	 * @example Internal.getSelfUser("discordBearerToken");
+	 * @memberof BotFunctions
+	 * @example BotFunctions.getSelfUser("discordBearerToken");
 	 */
-	static async getSelfUser(auth: string): Promise<Discord.APISelfUser> {
+	static async getSelfUser(auth: string): Promise<Discord.APISelfUser & { getGuilds: () => Array<Discord.APIGuild>;}> {
 		return new Promise((a, b) =>
 			https
 				.request({
 					method: "GET",
 					host: "discord.com",
 					path: "/api/v8/users/@me",
+					headers: {
+						"Authorization": `Bearer ${auth}`,
+						"User-Agent": Variables.USER_AGENT
+					}
+				}, (res) => {
+					const data: Array<Buffer> = [];
+
+					res
+						.on("error", b)
+						.on("data", (d) => data.push(d))
+						.on("end", () => {
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							const v = JSON.parse(Buffer.concat(data).toString());
+							Object.defineProperty(v, "getGuilds", {
+								value: BotFunctions.getSelfGuilds.bind(BotFunctions, auth)
+							});
+							return a(v);
+						});
+				})
+				.end()
+		);
+	}
+
+	/**
+	 * Get the user behind a Discord authorization token.
+	 *
+	 * @static
+	 * @param {string} auth - The bearer token.
+	 * @returns
+	 * @memberof BotFunctions
+	 * @example BotFunctions.getSelfUser("discordBearerToken");
+	 */
+	static async getSelfGuilds(auth: string): Promise<Array<Discord.APIGuild>> {
+		return new Promise((a, b) =>
+			https
+				.request({
+					method: "GET",
+					host: "discord.com",
+					path: "/api/v8/users/@me/guilds",
 					headers: {
 						"Authorization": `Bearer ${auth}`,
 						"User-Agent": Variables.USER_AGENT
@@ -93,9 +132,9 @@ export default class BotFunctions {
 	 * @param {("INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL")} type - The type of the embed.
 	 * @param {boolean} [json=false] - If json or {@link Eris#EmbedOptions} should be returned.
 	 * @returns {string | Eris.EmbedOptions}
-	 * @memberof Utility
-	 * @example Utility.genErrorEmbed("en", "INVALID_USER");
-	 * @example Utility.genErrorEmbed("en", "INVALID_MEMBER", true);
+	 * @memberof BotFunctions
+	 * @example BotFunctions.genErrorEmbed("en", "INVALID_USER");
+	 * @example BotFunctions.genErrorEmbed("en", "INVALID_MEMBER", true);
 	 */
 	static genErrorEmbed(lang: string, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json: true): EmbedOptions;
 	static genErrorEmbed(lang: string, type: "INVALID_USER" | "INVALID_MEMBER" | "INVALID_ROLE" | "INVALID_CHANNEL", json?: false): EmbedBuilder;
@@ -114,8 +153,8 @@ export default class BotFunctions {
 	 * @static
 	 * @param {(number | string)} num - The number to convert.
 	 * @returns {string}
-	 * @memberof Utility
-	 * @example Utility.numberToEmoji(1);
+	 * @memberof BotFunctions
+	 * @example BotFunctions.numberToEmoji(1);
 	 */
 	static numberToEmoji(num: number | string) {
 		if (typeof num === "number") num = num.toString();
@@ -141,8 +180,8 @@ export default class BotFunctions {
 	 * @static
 	 * @param {string} dir - The directory to laod from.
 	 * @param {Category} cat - The category to add on to.
-	 * @memberof Internal
-	 * @example Internal.loadCommands("/opt/FurryBot/src/commands/developer", <Category>);
+	 * @memberof BotFunctions
+	 * @example BotFunctions.loadCommands("/opt/FurryBot/src/commands/developer", <Category>);
 	 */
 	static loadCommands<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(dir: string, cat: Category<C, UC, GC>, ext = __filename.split(".").slice(-1)[0]) {
 		fs.readdirSync(dir).filter((f) => !fs.lstatSync(`${dir}/${f}`).isDirectory() && f.endsWith(ext) && f !== `index.${ext}`).map((f) => {
@@ -175,12 +214,10 @@ export default class BotFunctions {
 	 * @static
 	 * @param {ExtendedMessage} msg - The message instance.
 	 * @returns {string}
-	 * @memberof Internal
-	 * @example Internal.extraArgParsing(<ExtendedMessage>);
+	 * @memberof BotFunctions
+	 * @example BotFunctions.extraArgParsing(<ExtendedMessage>);
 	 */
-	static extraArgParsing<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(msg: ExtendedMessage<C, UC, GC>) {
-		let str = msg.args.join(" ");
-
+	static extraArgParsing<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(msg: ExtendedMessage<C, UC, GC>, str = msg.args.join(" ")) {
 		(str
 			.split(" ")
 			// throw away mentions
@@ -211,20 +248,183 @@ export default class BotFunctions {
 	 * @static
 	 * @param {ExtendedMessage} msg - The message instance.
 	 * @returns {string}
-	 * @memberof Internal
-	 * @example Internal.mentionOrIdToUsername(<ExtendedMessage>);
+	 * @memberof BotFunctions
+	 * @example BotFunctions.mentionOrIdToUsername(<ExtendedMessage>);
 	 */
-	static mentionOrIdToUsername<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(msg: ExtendedMessage<C, UC, GC>) {
-		let str = msg.args.join(" ");
-
+	static mentionOrIdToUsername<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(msg: ExtendedMessage<C, UC, GC>, str = msg.args.join(" ")) {
 		(str
 			.split(" ")
 			.map(k => /(?:<@!?)?([0-9]{15,21})>?/i.exec(k))
 			.filter(v => v !== null) as Array<RegExpExecArray>)
-			.map(([k, id]) => [k, (getErisClient(msg.client).users.get(id) || msg.channel.guild.members.get(id))?.username])
+			.map(([k, id]) => [k, msg.channel.guild.members.get(id)?.nick || (getErisClient(msg.client).users.get(id) || msg.channel.guild.members.get(id))?.username])
 			.filter(([, v]) => v !== undefined)
 			.map(([k, u]) => str = str.replace(k!, u!));
 
 		return str;
+	}
+
+	static memeArgParsing<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig>(msg: ExtendedMessage<C, UC, GC>, str = msg.args.join(" ")) {
+		return this.mentionOrIdToUsername(msg, this.extraArgParsing(msg, str));
+	}
+
+	/**
+	 * @typedef {object} CompareResult
+	 * @prop {boolean} higher
+	 * @prop {boolean} same
+	 * @prop {boolean} lower
+	 */
+
+	/**
+	 * @typedef {object} CompareMembersResult
+	 * @prop {CompareResult} member1
+	 * @prop {CompareResult} member2
+	 */
+
+	/**
+	 * Compare one member with another.
+	 *
+	 * @static
+	 * @param {Eris.Member} member1 - The first member of the comparison.
+	 * @param {Eris.Member} member2 - The second member of the comparison.
+	 * @returns {CompareMembersResult}
+	 * @memberof BotFunctions
+	 * @example BotFunctions.compareMembers(<Member1>, <Member2>);
+	 */
+	static compareMembers(member1: Eris.Member, member2: Eris.Member) {
+		const g = member1.guild;
+		const m1r = member1.roles.map(r => g.roles.get(r)!.position).sort((a, b) => b - a)[0] || 0;
+		const m2r = member2.roles.map(r => g.roles.get(r)!.position).sort((a, b) => b - a)[0] || 0;
+		if (member1.id === g.ownerID) return {
+			member1: {
+				higher: true,
+				same: false,
+				lower: false
+			},
+			member2: {
+				higher: false,
+				same: false,
+				lower: true
+			}
+		};
+
+		if (member2.id === g.ownerID || m1r < m2r) return {
+			member1: {
+				higher: false,
+				same: false,
+				lower: true
+			},
+			member2: {
+				higher: true,
+				same: false,
+				lower: false
+			}
+		};
+
+		if (m1r > m2r) return {
+			member1: {
+				higher: true,
+				same: false,
+				lower: false
+			},
+			member2: {
+				higher: false,
+				same: false,
+				lower: true
+			}
+		};
+
+		if (member1.id === member2.id || m1r === m2r) return {
+			member1: {
+				higher: false,
+				same: true,
+				lower: false
+			},
+			member2: {
+				higher: false,
+				same: true,
+				lower: false
+			}
+		};
+
+		return {
+			member1: {
+				higher: false,
+				same: false,
+				lower: false
+			},
+			member2: {
+				higher: false,
+				same: false,
+				lower: false
+			}
+		};
+	}
+
+	/**
+	 * Compare a member with a role.
+	 *
+	 * @static
+	 * @param {Eris.Member} member - The member to compare.
+	 * @param {Eris.Role} role - The role to compare.
+	 * @returns {CompareResult}
+	 * @memberof BotFunctions
+	 * @example BotFunctions.compareMemberWithRole(<Member>, <Role>);
+	 */
+	static compareMemberWithRole(member: Eris.Member, role: Eris.Role) {
+		const g = member.guild;
+		const mr = member.roles.map(r => g.roles.get(r)!.position).sort((a, b) => b - a)[0] || 0;
+
+		if (member.id === g.ownerID || mr > role.position) return {
+			higher: true,
+			same: false,
+			lower: false
+		};
+
+		if (mr < role.position) return {
+			higher: false,
+			same: false,
+			lower: true
+		};
+
+		if (mr === role.position) return {
+			higher: false,
+			same: true,
+			lower: false
+		};
+
+		return {
+			higher: false,
+			same: false,
+			lower: false
+		};
+	}
+
+	/**
+	 * Get a member's top role.
+	 *
+	 * @static
+	 * @param {Eris.Member} member - The member to get the top role of.
+	 * @param {(value: Eris.Role, index: number, array: Array<Eris.Role>) => boolean} [filter] - Filter roles.
+	 * @returns {(Eris.Role | undefined)}
+	 * @memberof BotFunctions
+	 * @example BotFunctions.getTopRole(<Member>);
+	 * @example BotFunctions.getTopRole(<Member>, (role) => role.id !== "someId");
+	 */
+	static getTopRole(member: Eris.Member, f?: (value: Eris.Role, index: number, array: Array<Eris.Role>) => boolean) {
+		if (!f) f = () => true;
+		return member.roles.map(r => member.guild.roles.get(r)!).filter(f).sort((a, b) => b.position - a.position)[0];
+	}
+
+	/**
+	 * Get a member's color role.
+	 *
+	 * @static
+	 * @param {Eris.Member} member - The member to get the color role of.
+	 * @returns {Eris.Role}
+	 * @memberof BotFunctions
+	 * @example BotFunctions.getColorRole(<Member>);
+	 */
+	static getColorRole(member: Eris.Member) {
+		return this.getTopRole(member, (role) => role.color !== 0);
 	}
 }

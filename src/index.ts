@@ -3,7 +3,7 @@ try {
 // eslint-disable-next-line no-empty
 } catch (e) {}
 import DatabaseTypes, { ConfigDataTypes, ConfigEditTypes, MaybeId } from "./@types/db";
-import DiscordTypes, { Oauth2Token, APISelfUser } from "./@types/Discord";
+import DiscordTypes, {  Oauth2Info, APISelfUser, APIGuild } from "./@types/Discord";
 import GeneralTypes, { ErisPermissions, CommandRestrictions, CategoryRestrictions, ProvidedClient, ProvidedClientExtra, ConfigLike } from "./@types/General";
 import * as Restrictions from "./cmd/Restrictions";
 import AntiSpam from "./cmd/AntiSpam";
@@ -36,7 +36,7 @@ export {
 	GuildConfig, UserConfig, Database, BotFunctions, ClientEvent,
 	FullColors, Constants, defaultEmojis, EmbedBuilder, EvalUtil,
 	ExtendedMessage,  MessageCollector, MonkeyPatch, WebhookStore, GeneralTypes,
-	ConfigDataTypes, ConfigEditTypes, MaybeId, Oauth2Token, APISelfUser,
-	ErisPermissions, CommandRestrictions, CategoryRestrictions, ProvidedClient, ProvidedClientExtra,
-	ConfigLike
+	ConfigDataTypes, ConfigEditTypes, MaybeId, Oauth2Info, APISelfUser,
+	APIGuild, ErisPermissions, CommandRestrictions, CategoryRestrictions, ProvidedClient,
+	ProvidedClientExtra, ConfigLike
 };

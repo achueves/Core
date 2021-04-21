@@ -1,5 +1,5 @@
 declare namespace Discord {
-	interface Oauth2Token {
+	interface Oauth2Info {
 		access_token: string;
 		expires_in: number;
 		refresh_token: string;
@@ -16,6 +16,16 @@ declare namespace Discord {
 		mfa_enabled: boolean;
 		flags: number;
 		premium_type: number;
+	}
+
+	interface APIGuild {
+		id: string;
+		name: string;
+		icon: string;
+		owner: boolean;
+		permissions: number;
+		features: Array<string>;
+		permissions_new: string;
 	}
 }
 

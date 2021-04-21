@@ -5,7 +5,6 @@ import UserConfig from "../db/Models/UserConfig";
 import { ProvidedClientExtra } from "../@types/General";
 import Database from "../db";
 import Eris from "eris";
-import { BaseClusterWorker } from "eris-fleet";
 
 export default class ExtendedMessage<
 	C extends ProvidedClientExtra,
@@ -31,7 +30,7 @@ export default class ExtendedMessage<
 		keyValue: Record<string, string>;
 	};
 	// thanks Eris
-	channel!: Omit<CH, "guild"> & { guild: Eris.Guild; };
+	channel!: CH;
 	constructor(data: Eris.BaseData, client: C, slash?: boolean, slashInfo?: ExtendedMessage<C, UC, GC, CH>["slashInfo"]) {
 		super(data, getErisClient(client));
 		this.client = client;
@@ -81,18 +80,11 @@ export default class ExtendedMessage<
 		if (useMentions && this.mentionList.users[mentionPos]) return this.mentionList.users[mentionPos];
 		if (!this.args || !this.args[argPos]) return null;
 		const t = this.args[argPos].toLowerCase();
-		if (this.client instanceof BaseClusterWorker) {
-			const [, a, b] = /(?:<@!?([0-9]{15,21})>|([0-9]{15,21}))/.exec(t) ?? [];
-			const id = a || b ? await (this.client.ipc.fetchUser(a || b) as Promise<Eris.User | null>).catch(() => null) : null;
-			if (id !== null) return id;
-		} else {
-			const username = getErisClient(this.client).users.find((u) => u.username.toLowerCase() === t);
-			const tag = getErisClient(this.client).users.find((u) => `${u.username}#${u.discriminator}`.toLowerCase() === t);
-			const [, a, b] = /(?:<@!?([0-9]{15,21})>|([0-9]{15,21}))/.exec(t) ?? [];
-			const id = (a || b) && "getUser" in this.client ? this.client.getUser!(a || b).catch(() => null) : null;
-			return username || tag || id || null;
-		}
-
+		const username = getErisClient(this.client).users.find((u) => u.username.toLowerCase() === t);
+		const tag = getErisClient(this.client).users.find((u) => `${u.username}#${u.discriminator}`.toLowerCase() === t);
+		const [, a, b] = /(?:<@!?([0-9]{15,21})>|([0-9]{15,21}))/.exec(t) ?? [];
+		const id = (a || b) && "getUser" in this.client ? this.client.getUser!(a || b).catch(() => null) : null;
+		return username || tag || id || null;
 		return null;
 	}
 

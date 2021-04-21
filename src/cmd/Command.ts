@@ -6,7 +6,7 @@ import { CommandRestrictions, ErisPermissions, ProvidedClientExtra } from "../@t
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
 import { ArrayOneOrMore } from "@uwu-codes/utils";
-import path from "path";
+import path from "node:path";
 
 type OverrideReturn = void | "DEFAULT";
 
