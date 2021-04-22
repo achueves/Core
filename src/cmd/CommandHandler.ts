@@ -7,7 +7,7 @@ import AntiSpam from "./AntiSpam";
 import { ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
-import { ArrayOneOrMore, ModuleImport } from "@uwu-codes/utils";
+import { ModuleImport } from "@uwu-codes/utils";
 import Logger from "logger";
 import path from "node:path";
 
@@ -31,8 +31,8 @@ export default class CommandHandler<C extends ProvidedClientExtra, UC extends Us
 		return [...this.categories.reduce((a, b) => a.concat(b.commands), [] as Array<Command<C, UC, GC>>)];
 	}
 
-	get triggers(): Array<ArrayOneOrMore<string>> {
-		return [...this.categories.reduce((a, b) => a.concat(b.commands.reduce((c, d) => c.concat(d.triggers), [] as Array<ArrayOneOrMore<string>>)), [] as Array<ArrayOneOrMore<string>>)];
+	get triggers(): Array<string> {
+		return this.commands.reduce((a,b) => a.concat(b.triggers), [] as Array<string>);
 	}
 
 	get categoryNames() {
