@@ -5,8 +5,8 @@ import { CategoryRestrictions, ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
 import * as fs from "fs-extra";
-import { ModuleImport } from "@uwu-codes/utils";
-import path from "node:path";
+import { ModuleImport } from "utilities";
+import path from "path";
 
 export default class Category<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> {
 	name: string;

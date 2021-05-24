@@ -9,11 +9,11 @@ import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
 import Command from "../cmd/Command";
 import { ExtendedMessage } from "..";
-import Eris, { EmbedOptions, Role } from "eris";
-import { AnyObject,  ModuleImport,  Variables } from "@uwu-codes/utils";
+import Eris, { EmbedOptions } from "eris";
+import { AnyObject,  ModuleImport,  Variables } from "utilities";
 import * as fs from "fs-extra";
-import * as https from "node:https";
-import path from "node:path";
+import * as https from "https";
+import path from "path";
 
 export default class BotFunctions {
 	private constructor() {

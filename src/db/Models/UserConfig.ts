@@ -1,7 +1,7 @@
 import { MaybeId, ConfigDataTypes, ConfigEditTypes } from "../../@types/db";
 import Database from "..";
 import { UpdateQuery, FindOneAndUpdateOption, MatchKeysAndValues } from "mongodb";
-import { AnyObject, Utility } from "@uwu-codes/utils";
+import { AnyObject, Utility } from "utilities";
 
 export default abstract class UserConfig {
 	private DEFAULTS: AnyObject;

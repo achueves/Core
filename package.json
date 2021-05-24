@@ -1,6 +1,6 @@
 {
   "name": "@uwu-codes/core",
-  "version": "1.0.100",
+  "version": "1.1.6",
   "description": "A core library for my bots.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -24,35 +24,34 @@
   },
   "homepage": "https://github.com/UWUCode/Core#readme",
   "dependencies": {
-    "@types/mongodb": "^3.6.12",
-    "@uwu-codes/discord-slash-commands": "^1.0.4",
-    "@uwu-codes/utils": "^1.0.27",
+    "@types/mongodb": "^3.6.16",
     "deasync": "^0.1.21",
     "dot-object": "^2.1.4",
-    "eris": "^0.15.0",
-    "fs-extra": "^9.1.0",
-    "ioredis": "^4.27.1",
+    "eris": "github:abalabahaha/eris#dev",
+    "fs-extra": "^10.0.0",
+    "ioredis": "^4.27.3",
     "json5": "^2.2.0",
     "language": "npm:@uwu-codes/language@^1.0.4",
-    "logger": "npm:@uwu-codes/logger@^1.0.15",
-    "mongodb": "^3.6.6",
-    "source-map-support": "^0.5.19"
+    "logger": "npm:@uwu-codes/logger@^1.0.22",
+    "mongodb": "^3.6.8",
+    "source-map-support": "^0.5.19",
+    "utilities": "npm:@uwu-codes/utils@^1.0.37"
   },
   "devDependencies": {
     "@types/deasync": "^0.1.1",
     "@types/dot-object": "^2.1.2",
     "@types/fs-extra": "^9.0.11",
     "@types/json5": "^0.0.30",
-    "@types/node": "^15.0.1",
-    "@uwu-codes/eslint-config": "^1.0.12",
+    "@types/node": "^15.6.0",
+    "@uwu-codes/eslint-config": "^1.0.17",
     "@uwu-codes/tsconfig": "^1.0.1",
     "check-for-leaks": "^1.2.1",
-    "eslint": "^7.25.0",
+    "eslint": "^7.27.0",
     "husky": "^6.0.0",
-    "typescript": "beta"
+    "typescript": "^4.3.1-rc"
   },
   "optionalDependencies": {
-    "eris-fleet": "npm:@furrybotco/eris-fleet@^0.3.5-dev.19"
+    "clustering": "npm:@uwu-codes/clustering@^1.0.10"
   },
   "private": false,
   "publishConfig": {

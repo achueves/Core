@@ -1,8 +1,8 @@
 import "node";
 import CommandHandler from "../cmd/CommandHandler";
 import Eris from "eris";
-import { KnownKeys } from "@uwu-codes/utils";
-import { BaseClusterWorker } from "eris-fleet";
+import { KnownKeys } from "utilities";
+import { BaseCluster } from "clustering";
 
 declare namespace General {
 	type ErisPermissions = KnownKeys<typeof Eris.Constants.Permissions>;
@@ -10,7 +10,7 @@ declare namespace General {
 	type CommandRestrictions = "beta" | "developer" | "donator" | "guildOwner" | "nsfw" | "premium" | "supportServer";
 	type CategoryRestrictions = "beta" | "developer";
 
-	type ProvidedClient = Eris.Client | BaseClusterWorker;
+	type ProvidedClient = Eris.Client | BaseCluster;
 	type ProvidedClientExtra = ProvidedClient & {
 		// fuck you
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any

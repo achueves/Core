@@ -21,6 +21,7 @@ import ClientEvent from "./general/ClientEvent";
 import * as FullColors from "./general/Colors";
 export * from "./general/Constants";
 import * as Constants from "./general/Constants";
+export * from "./general/WebhookStore";
 import defaultEmojis from "./general/defaultEmojis.json";
 import EmbedBuilder from "./general/EmbedBuilder";
 import EvalUtil from "./general/EvalUtil";

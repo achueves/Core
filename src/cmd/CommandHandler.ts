@@ -7,9 +7,9 @@ import AntiSpam from "./AntiSpam";
 import { ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
-import { ModuleImport } from "@uwu-codes/utils";
+import { ModuleImport } from "utilities";
 import Logger from "logger";
-import path from "node:path";
+import path from "path";
 
 
 export default class CommandHandler<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> {

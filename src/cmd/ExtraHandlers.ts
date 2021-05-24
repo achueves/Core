@@ -8,7 +8,7 @@ import { ErisPermissions, ProvidedClientExtra } from "../@types/General";
 import getErisClient from "../general/getErisClient";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
-import { Time } from "@uwu-codes/utils";
+import { Time } from "utilities";
 import Language from "language";
 
 export default class ExtraHandlers<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> {

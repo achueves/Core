@@ -1,7 +1,7 @@
 import getErisClient from "./getErisClient";
 import { ProvidedClient, ProvidedClientExtra } from "../@types/General";
 import Eris from "eris";
-import { AnyFunction } from "@uwu-codes/utils";
+import { AnyFunction } from "utilities";
 
 export default class MessageCollector<C extends ProvidedClient | ProvidedClientExtra> {
 	client: C;

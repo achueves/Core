@@ -1,4 +1,4 @@
-import { DeepPartial, WithoutFunctions } from "@uwu-codes/utils";
+import { DeepPartial, WithoutFunctions } from "utilities";
 import { WithId } from "mongodb";
 
 declare namespace DatabaseTypes {

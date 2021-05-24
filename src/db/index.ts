@@ -2,7 +2,7 @@ import UserConfig from "./Models/UserConfig";
 import GuildConfig from "./Models/GuildConfig";
 import { ProvidedClient, ProvidedClientExtra } from "../@types/General";
 import { MongoClient, Collection, MongoClientOptions } from "mongodb";
-import { Timers } from "@uwu-codes/utils";
+import { Timers } from "utilities";
 import deasync from "deasync";
 import IORedis from "ioredis";
 import Logger from "logger";

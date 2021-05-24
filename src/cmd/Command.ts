@@ -5,8 +5,8 @@ import ExtendedMessage from "../general/ExtendedMessage";
 import { CommandRestrictions, ErisPermissions, ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
-import { ArrayOneOrMore } from "@uwu-codes/utils";
-import path from "node:path";
+import { ArrayOneOrMore } from "utilities";
+import path from "path";
 
 type OverrideReturn = void | "DEFAULT";
 

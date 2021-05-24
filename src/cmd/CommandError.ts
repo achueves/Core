@@ -3,7 +3,7 @@ import Command from "./Command";
 import { ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
-import { Strings } from "@uwu-codes/utils";
+import { Strings } from "utilities";
 
 export default class CommandError<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> extends Error {
 	cmd: Command<C, UC, GC>;

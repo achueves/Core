@@ -24,13 +24,13 @@ export default class ExtendedMessage<
 	uConfig!: UC;
 	args!: Array<string>;
 	cmd!: Command<C, UC, GC> | null;
-	prefix!: string;
+	declare prefix: string;
 	dashedArgs!: {
 		value: Array<string>;
 		keyValue: Record<string, string>;
 	};
 	// thanks Eris
-	channel!: CH;
+	declare channel: CH;
 	constructor(data: Eris.BaseData, client: C, slash?: boolean, slashInfo?: ExtendedMessage<C, UC, GC, CH>["slashInfo"]) {
 		super(data, getErisClient(client));
 		this.client = client;
@@ -166,7 +166,9 @@ export default class ExtendedMessage<
 						content
 					};
 				}
-				content.messageReferenceID = id;
+				content.messageReference = {
+					messageID: id
+				};
 
 				break;
 			}

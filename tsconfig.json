@@ -4,7 +4,8 @@
         "outDir": "./build",
         "baseUrl": "./src",
         "declaration": true,
-        "inlineSourceMap": false
+        "skipLibCheck": true,
+        "inlineSourceMap": true
     },
     "include": [
         "src/**/*"
