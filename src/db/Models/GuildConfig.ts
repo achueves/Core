@@ -4,8 +4,9 @@ import { UpdateQuery, FindOneAndUpdateOption, MatchKeysAndValues } from "mongodb
 import { AnyObject, Utility } from "utilities";
 
 export default abstract class GuildConfig<L extends string = string> {
-	private DEFAULTS: AnyObject;
-	protected db: typeof Database;
+	private DEFAULTS!: AnyObject;
+	protected db!: typeof Database;
+	private ref!: GuildConfig;
 	id: string;
 	settings!: {
 		// this can't be hardcoded on this side due to the way Language works
@@ -16,17 +17,34 @@ export default abstract class GuildConfig<L extends string = string> {
 		if (def === undefined) throw new TypeError("No defaults provided");
 		if (db === undefined) throw new TypeError("Invalid database provided.");
 		this.id = id;
-		this.DEFAULTS = def;
-		this.db = db;
-		this.load.call(this, data);
+		Object.defineProperties(this, {
+			DEFAULTS: {
+				writable: false,
+				enumerable: false,
+				value: def
+			},
+			db: {
+				writable: false,
+				enumerable: false,
+				value: db
+			}
+		});
 	}
 
-	private load(data: MaybeId<ConfigDataTypes<GuildConfig, "id">>) {
+	protected setRef(ref: GuildConfig) {
+		Object.defineProperty(this, "ref", {
+			writable: false,
+			enumerable: false,
+			value: ref
+		});
+	}
+
+	protected load(data: MaybeId<ConfigDataTypes<GuildConfig, "id">>) {
 		if (this.DEFAULTS === undefined) throw new TypeError("No defaults provided");
 		if (this.db === undefined) throw new TypeError("Invalid database.");
 		// eslint-disable-next-line no-underscore-dangle
 		if ("_id" in data) delete (data as AnyObject)._id;
-		if (this.DEFAULTS) Object.assign(this, Utility.mergeObjects(data, this.DEFAULTS));
+		if (this.DEFAULTS) Object.assign(this.ref, Utility.mergeObjects(data, this.DEFAULTS));
 		return this;
 	}
 

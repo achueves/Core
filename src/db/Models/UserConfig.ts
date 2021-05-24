@@ -4,24 +4,42 @@ import { UpdateQuery, FindOneAndUpdateOption, MatchKeysAndValues } from "mongodb
 import { AnyObject, Utility } from "utilities";
 
 export default abstract class UserConfig {
-	private DEFAULTS: AnyObject;
-	protected db: typeof Database;
+	private DEFAULTS!: AnyObject;
+	protected db!: typeof Database;
+	private ref!: UserConfig;
 	id: string;
 	constructor(id: string, data: MaybeId<ConfigDataTypes<UserConfig, "id">>, def: AnyObject, db: typeof Database) {
 		if (def === undefined) throw new TypeError("No defaults provided");
 		if (db === undefined) throw new TypeError("Invalid database provided.");
 		this.id = id;
-		this.DEFAULTS = def;
-		this.db = db;
-		this.load.call(this, data);
+		Object.defineProperties(this, {
+			DEFAULTS: {
+				writable: false,
+				enumerable: false,
+				value: def
+			},
+			db: {
+				writable: false,
+				enumerable: false,
+				value: db
+			}
+		});
 	}
 
-	private load(data: MaybeId<ConfigDataTypes<UserConfig, "id">>) {
+	protected setRef(ref: UserConfig) {
+		Object.defineProperty(this, "ref", {
+			writable: false,
+			enumerable: false,
+			value: ref
+		});
+	}
+
+	protected load(data: MaybeId<ConfigDataTypes<UserConfig, "id">>) {
 		if (this.DEFAULTS === undefined) throw new TypeError("No defaults provided");
 		if (this.db === undefined) throw new TypeError("Invalid database.");
 		// eslint-disable-next-line no-underscore-dangle
 		if ("_id" in data) delete (data as AnyObject)._id;
-		if (this.DEFAULTS) Object.assign(this, Utility.mergeObjects(data, this.DEFAULTS));
+		if (this.DEFAULTS) Object.assign(this.ref, Utility.mergeObjects(data, this.DEFAULTS));
 		return this;
 	}
 
@@ -42,9 +60,9 @@ export default abstract class UserConfig {
 
 	async mongoEdit<T = ConfigEditTypes<this>>(d: UpdateQuery<T>, opt?: FindOneAndUpdateOption<T>) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		await this.db.collection<T>("users").findOneAndUpdate({ id: this.id } as any, d, opt);
+		const j = await this.db.collection<T>("users").findOneAndUpdate({ id: this.id } as any, d, opt);
 		await this.reload();
-		return this;
+		return j;
 	}
 
 	async create() {
