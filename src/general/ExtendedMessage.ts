@@ -108,16 +108,16 @@ export default class ExtendedMessage<
 		return username || tag || id || null;
 	}
 
-	async getChannelFromArgs<T extends Eris.GuildChannel = Eris.TextChannel>(argPos = 0, useMentions = true, mentionPos = argPos): Promise<T | null> {
+	async getChannelFromArgs<T extends Eris.GuildChannel = Eris.TextChannel>(argPos = 0, useMentions = true, mentionPos = argPos, caseSensitive = false, type: number | null = null): Promise<T | null> {
 		if (!(this.channel instanceof Eris.GuildChannel)) throw new TypeError("ExtendedMessage#getChannelFromArgs called on non-guild channel.");
 		if (useMentions && this.mentionList.channels[mentionPos]) return this.mentionList.channels[mentionPos] as T;
 		if (!this.args || !this.args[argPos]) return null;
-		const t = this.args[argPos].toLowerCase(),
-
-			name = this.channel.guild.channels.find((c) => c.name.toLowerCase() === t) as T;
+		const t = caseSensitive ? this.args[argPos] : this.args[argPos].toLowerCase();
+		const f = (ch: Eris.GuildChannel) => type === null ? true : ch.type === type;
+		const name = this.channel.guild.channels.filter(f).find((c) => (caseSensitive ? c.name : c.name.toLowerCase()) === t) as T;
 		let id: T | null = null;
 		if (/[0-9]{15,21}/.test(t)) {
-			id = this.channel.guild.channels.find((c) => c.id === this.args[argPos]) as T ?? null;
+			id = this.channel.guild.channels.filter(f).find((c) => c.id === this.args[argPos]) as T ?? null;
 			if (id === null) id = await getErisClient(this.client).getRESTChannel(t).catch(() => null) as T;
 		}
 
