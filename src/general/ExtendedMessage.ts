@@ -4,7 +4,7 @@ import GuildConfig from "../db/Models/GuildConfig";
 import UserConfig from "../db/Models/UserConfig";
 import { ProvidedClientExtra } from "../@types/General";
 import Database from "../db";
-import Eris from "eris";
+import Eris, { MessageContent, MessageFile, WebhookPayload } from "eris";
 
 export default class ExtendedMessage<
 	C extends ProvidedClientExtra,
@@ -15,11 +15,6 @@ export default class ExtendedMessage<
 	> extends Eris.Message<CH> {
 	// these are defined inside the load function
 	client!: C;
-	slash!: boolean;
-	slashInfo!: {
-		id: string;
-		token: string;
-	} | null;
 	gConfig!: GC;
 	uConfig!: UC;
 	args!: Array<string>;
@@ -29,8 +24,14 @@ export default class ExtendedMessage<
 		value: Array<string>;
 		keyValue: Record<string, string>;
 	};
-	// thanks Eris
-	declare channel: CH;
+	declare channel: CH & {
+		createMessage: CH["createMessage"];
+		createMessageNoSlash: CH["createMessage"];
+	};
+	update = false;
+	slash = false;
+	slashInfo: { id: string; token: string; } | null = null;
+	firstReply = false;
 	constructor(data: Eris.BaseData, client: C, slash?: boolean, slashInfo?: ExtendedMessage<C, UC, GC, CH>["slashInfo"]) {
 		super(data, getErisClient(client));
 		this.client = client;
@@ -51,7 +52,10 @@ export default class ExtendedMessage<
 		};
 	}
 
-	async load(db: typeof Database) {
+	async load(db: typeof Database, update?: boolean, slash?: boolean, slashInfo?: { id: string; token: string; } | null) {
+		this.update = !!update;
+		this.slash = !!slash;
+		this.slashInfo = slashInfo ?? null;
 		if (!(this.channel instanceof Eris.GuildChannel)) throw new TypeError("ExtendedMessage#load called on non-guild channel.");
 		const g = this.gConfig = await db.getGuild(this.channel.guild.id).then((v) => v.fix()) as GC,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -72,6 +76,34 @@ export default class ExtendedMessage<
 			value: this.content.slice(prefix.length).split(" ").map((a) => new RegExp("^--([^=].{1,})$").exec(a)).map((a) => !a || !a[1] ? null : a[1]).filter((a) => a !== null) as Array<string>,
 			keyValue: this.content.slice(prefix.length).split(" ").map((a) => new RegExp("^--(.{1,})=(.*)$").exec(a)).map((a) => !a || a.length < 3 ? null : ({ [a[1]]: a[2] })).filter((a) => a !== null).reduce((a, b) => ({ ...a, ...b }), {}) as { [k: string]: string; }
 		};
+
+		if (slash) {
+			if (!this.client.h) throw new TypeError("Attempted to call ExtendedMessage#load with slash command content without Client#h (CommandHelper) being present.");
+			const o = this.channel.createMessage;
+			this.channel.createMessageNoSlash = o;
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- no
+			// @ts-ignore
+			this.channel.createMessage = (async(content: MessageContent, file?: MessageFile) => {
+				if (this.slash) {
+					if (!this.client.h) throw new TypeError("ExtendedMessage#reply called on slash command message with Client instance of CommandHelper not being present.");
+					if (!this.slashInfo || !this.slashInfo.id || !this.slashInfo.token) throw new TypeError("ExtendedMessage#reply called on slash command message with slashInfo not being properly formed.");
+					if (this.firstReply) return this.channel.createMessageNoSlash(content, file);
+					else {
+						this.firstReply = true;
+						if (typeof content === "string") content = { content };
+						// because editOriginalInteractionResponse takes webhook content
+						if (content.embed) {
+							(content as WebhookPayload).embeds = [content.embed];
+							delete content.embed;
+						}
+						const v = await this.client.h.editOriginalInteractionResponse(this.slashInfo.token, content) as { id: string; };
+						return this.channel.getMessage(v.id);
+					}
+				} else return this.channel.createMessageNoSlash(content, file);
+
+			});
+		}
+
 		return true;
 	}
 
@@ -185,7 +217,22 @@ export default class ExtendedMessage<
 			return this.client.h.createInteractionResponse(this.slashInfo.id, this.slashInfo.token, InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE)
 		}
 		else { */
-		if (this.slash) return this.channel.createMessage(content);
+		if (this.slash) {
+			if (!this.client.h) throw new TypeError("ExtendedMessage#reply called on slash command message with Client instance of CommandHelper not being present.");
+			if (!this.slashInfo || !this.slashInfo.id || !this.slashInfo.token) throw new TypeError("ExtendedMessage#reply called on slash command message with slashInfo not being properly formed.");
+			if (this.firstReply) return this.channel.createMessage(content);
+			else {
+				this.firstReply = true;
+				if (typeof content === "string") content = { content };
+				// because editOriginalInteractionResponse takes webhook content
+				if (content.embed) {
+					(content as WebhookPayload).embeds = [content.embed];
+					delete content.embed;
+				}
+				const v = await this.client.h.editOriginalInteractionResponse(this.slashInfo.token, content) as { id: string; };
+				return this.channel.getMessage(v.id);
+			}
+		}
 		const text = await this.getReplyText(content, type, this.id);
 		return this.channel.createMessage(text);
 		/* } */

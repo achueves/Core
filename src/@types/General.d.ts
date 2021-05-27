@@ -3,6 +3,7 @@ import CommandHandler from "../cmd/CommandHandler";
 import Eris from "eris";
 import { KnownKeys } from "utilities";
 import { BaseCluster } from "clustering";
+import { CommandHelper } from "slash-extras";
 
 declare namespace General {
 	type ErisPermissions = KnownKeys<typeof Eris.Constants.Permissions>;
@@ -18,6 +19,7 @@ declare namespace General {
 		getUser?(id: string): Promise<Eris.User | null>;
 		getGuild?(id: string): Promise<Eris.Guild | null>;
 		typing?: Record<string, NodeJS.Timeout>;
+		h?: CommandHelper;
 	};
 
 	interface ConfigLike {
