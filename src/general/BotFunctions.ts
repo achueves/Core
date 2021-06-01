@@ -2,13 +2,13 @@ import EmbedBuilder from "./EmbedBuilder";
 import defaultEmojis from "./defaultEmojis.json";
 import { Colors } from "./Constants";
 import getErisClient from "./getErisClient";
-import Discord from "../@types/Discord";
 import Category from "../cmd/Category";
 import { ProvidedClientExtra } from "../@types/General";
 import UserConfig from "../db/Models/UserConfig";
 import GuildConfig from "../db/Models/GuildConfig";
 import Command from "../cmd/Command";
 import { ExtendedMessage } from "..";
+import { RESTPostOAuth2AccessTokenResult, RESTGetAPICurrentUserResult, RESTAPIPartialCurrentUserGuild } from "discord-api-types/rest/v8";
 import Eris, { EmbedOptions } from "eris";
 import { AnyObject,  ModuleImport,  Variables } from "utilities";
 import * as fs from "fs-extra";
@@ -26,11 +26,11 @@ export default class BotFunctions {
 	 * @static
 	 * @param {string} code - The code of the authorization.
 	 * @param {string} [redirectURL] - The redirect URL used.
-	 * @returns {Promise<Discord.Oauth2Info>}
+	 * @returns {Promise<RESTPostOAuth2AccessTokenResult>}
 	 * @memberof BotFunctions
 	 * @example BotFunctions.authorizeOAuth("someCodeFromDiscord, "clientId", "clientSecret", "https://example.com", ["bot]");
 	 */
-	static async authorizeOAuth(code: string, clientId: string, clientSecret: string, redirectURL: string, scopes: Array<string>): Promise<Discord.Oauth2Info> {
+	static async authorizeOAuth(code: string, clientId: string, clientSecret: string, redirectURL: string, scopes: Array<string>): Promise<RESTPostOAuth2AccessTokenResult> {
 		return new Promise((a, b) => {
 			const req = https.request({
 				method: "GET",
@@ -61,8 +61,9 @@ export default class BotFunctions {
 	 * @returns
 	 * @memberof BotFunctions
 	 * @example BotFunctions.getSelfUser("discordBearerToken");
+	 * @returns {Promise<RESTGetAPICurrentUserResult>}
 	 */
-	static async getSelfUser(auth: string): Promise<Discord.APISelfUser & { getGuilds: () => Array<Discord.APIGuild>;}> {
+	static async getSelfUser(auth: string): Promise<RESTGetAPICurrentUserResult & { getGuilds: () => Array<RESTAPIPartialCurrentUserGuild>;}> {
 		return new Promise((a, b) =>
 			https
 				.request({
@@ -101,7 +102,7 @@ export default class BotFunctions {
 	 * @memberof BotFunctions
 	 * @example BotFunctions.getSelfUser("discordBearerToken");
 	 */
-	static async getSelfGuilds(auth: string): Promise<Array<Discord.APIGuild>> {
+	static async getSelfGuilds(auth: string): Promise<Array<Array<RESTAPIPartialCurrentUserGuild>>> {
 		return new Promise((a, b) =>
 			https
 				.request({

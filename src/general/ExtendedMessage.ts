@@ -3,8 +3,8 @@ import Command from "../cmd/Command";
 import GuildConfig from "../db/Models/GuildConfig";
 import UserConfig from "../db/Models/UserConfig";
 import { ProvidedClientExtra } from "../@types/General";
-import Database from "../db";
-import Eris, { MessageContent, MessageFile, WebhookPayload } from "eris";
+import { DBLike } from "../@types/db";
+import Eris, { MessageContent, MessageFile, TextChannel, WebhookPayload } from "eris";
 
 export default class ExtendedMessage<
 	C extends ProvidedClientExtra,
@@ -52,14 +52,14 @@ export default class ExtendedMessage<
 		};
 	}
 
-	async load(db: typeof Database, update?: boolean, slash?: boolean, slashInfo?: { id: string; token: string; } | null) {
+	async load(db: DBLike, update?: boolean, slash?: boolean, slashInfo?: { id: string; token: string; } | null) {
 		this.update = !!update;
 		this.slash = !!slash;
 		this.slashInfo = slashInfo ?? null;
 		if (!(this.channel instanceof Eris.GuildChannel)) throw new TypeError("ExtendedMessage#load called on non-guild channel.");
-		const g = this.gConfig = await db.getGuild(this.channel.guild.id).then((v) => v.fix()) as GC,
+		const g = this.gConfig = await db.get("guilds", this.channel.guild.id).then((v) => v!.fix()) as GC,
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			u = this.uConfig = await db.getUser(this.author.id).then((v) => v.fix()) as UC,
+			u = this.uConfig = await db.get("users", this.author.id).then((v) => v!.fix()) as UC,
 			// eslint-disable-next-line no-useless-escape
 			p = new RegExp(`(${g.prefix.map((v) => v.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")).join("|")}|<@!?${getErisClient(this.client).user.id}>)(?:\s+)*`, "i").exec(this.content);
 		if (!p || p.length === 0) return false;
@@ -79,8 +79,7 @@ export default class ExtendedMessage<
 
 		if (slash) {
 			if (!this.client.h) throw new TypeError("Attempted to call ExtendedMessage#load with slash command content without Client#h (CommandHelper) being present.");
-			const o = this.channel.createMessage;
-			this.channel.createMessageNoSlash = o;
+			this.channel.createMessageNoSlash = TextChannel.prototype.createMessage.bind(this.channel);
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- no
 			// @ts-ignore
 			this.channel.createMessage = (async(content: MessageContent, file?: MessageFile) => {

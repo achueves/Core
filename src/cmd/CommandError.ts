@@ -7,8 +7,6 @@ import { Strings } from "utilities";
 
 export default class CommandError<C extends ProvidedClientExtra, UC extends UserConfig, GC extends GuildConfig> extends Error {
 	cmd: Command<C, UC, GC>;
-	// defined in super
-	message!: "INVALID_USAGE";
 	extra: string;
 	constructor(type: "INVALID_USAGE", cmd: Command<C, UC, GC>, extra?: string) {
 		super(type);

@@ -2,8 +2,7 @@ try {
 	require("source-map-support/register");
 // eslint-disable-next-line no-empty
 } catch (e) {}
-import DatabaseTypes, { ConfigDataTypes, ConfigEditTypes, MaybeId } from "./@types/db";
-import DiscordTypes, {  Oauth2Info, APISelfUser, APIGuild } from "./@types/Discord";
+import DatabaseTypes, { ConfigDataTypes, ConfigEditTypes, Modifiers, DBLike } from "./@types/db";
 import GeneralTypes, { ErisPermissions, CommandRestrictions, CategoryRestrictions, ProvidedClient, ProvidedClientExtra, ConfigLike } from "./@types/General";
 import * as Restrictions from "./cmd/Restrictions";
 import AntiSpam from "./cmd/AntiSpam";
@@ -15,7 +14,6 @@ import CooldownHandler from "./cmd/CooldownHandler";
 import ExtraHandlers from "./cmd/ExtraHandlers";
 import GuildConfig from "./db/Models/GuildConfig";
 import UserConfig from "./db/Models/UserConfig";
-import Database from "./db";
 import BotFunctions from "./general/BotFunctions";
 import ClientEvent from "./general/ClientEvent";
 import * as FullColors from "./general/Colors";
@@ -32,12 +30,37 @@ import WebhookStore from "./general/WebhookStore";
 
 
 export {
-	DatabaseTypes, DiscordTypes, Restrictions, AntiSpam, Category,
-	Command, CommandError, CommandHandler, CooldownHandler, ExtraHandlers,
-	GuildConfig, UserConfig, Database, BotFunctions, ClientEvent,
-	FullColors, Constants, defaultEmojis, EmbedBuilder, EvalUtil,
-	ExtendedMessage,  MessageCollector, MonkeyPatch, WebhookStore, GeneralTypes,
-	ConfigDataTypes, ConfigEditTypes, MaybeId, Oauth2Info, APISelfUser,
-	APIGuild, ErisPermissions, CommandRestrictions, CategoryRestrictions, ProvidedClient,
-	ProvidedClientExtra, ConfigLike
+	DatabaseTypes,
+	Restrictions,
+	AntiSpam,
+	Category,
+	Command,
+	CommandError,
+	CommandHandler,
+	CooldownHandler,
+	ExtraHandlers,
+	GuildConfig,
+	UserConfig,
+	BotFunctions,
+	ClientEvent,
+	FullColors,
+	Constants,
+	defaultEmojis,
+	EmbedBuilder,
+	EvalUtil,
+	ExtendedMessage,
+	MessageCollector,
+	MonkeyPatch,
+	WebhookStore,
+	GeneralTypes,
+	ConfigDataTypes,
+	ConfigEditTypes,
+	ErisPermissions,
+	CommandRestrictions,
+	CategoryRestrictions,
+	ProvidedClient,
+	ProvidedClientExtra,
+	ConfigLike,
+	DBLike,
+	Modifiers
 };

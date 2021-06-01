@@ -1,6 +1,6 @@
 {
   "name": "@uwu-codes/core",
-  "version": "1.1.16",
+  "version": "1.1.41",
   "description": "A core library for my bots.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/UWUCode/Core#readme",
   "dependencies": {
-    "@types/mongodb": "^3.6.16",
     "deasync": "^0.1.21",
+    "discord-api-types": "^0.18.1",
     "dot-object": "^2.1.4",
     "eris": "github:abalabahaha/eris#dev",
     "fs-extra": "^10.0.0",
@@ -33,26 +33,27 @@
     "json5": "^2.2.0",
     "language": "npm:@uwu-codes/language@^1.0.4",
     "logger": "npm:@uwu-codes/logger@^1.0.22",
-    "mongodb": "^3.6.8",
+    "rethinkdb": "^2.4.2",
     "slash-extras": "npm:@uwu-codes/discord-slash-commands@^1.0.4",
     "source-map-support": "^0.5.19",
-    "utilities": "npm:@uwu-codes/utils@^1.0.37"
+    "utilities": "npm:@uwu-codes/utils@^1.0.40"
   },
   "devDependencies": {
     "@types/deasync": "^0.1.1",
     "@types/dot-object": "^2.1.2",
     "@types/fs-extra": "^9.0.11",
     "@types/json5": "^0.0.30",
-    "@types/node": "^15.6.0",
-    "@uwu-codes/eslint-config": "^1.0.17",
+    "@types/node": "^15.6.1",
+    "@types/rethinkdb": "^2.3.16",
+    "@uwu-codes/eslint-config": "^1.0.18",
     "@uwu-codes/tsconfig": "^1.0.1",
     "check-for-leaks": "^1.2.1",
     "eslint": "^7.27.0",
     "husky": "^6.0.0",
-    "typescript": "^4.3.1-rc"
+    "typescript": "^4.3.2"
   },
   "optionalDependencies": {
-    "clustering": "npm:@uwu-codes/clustering@^1.0.10"
+    "clustering": "npm:@uwu-codes/clustering@^1.0.25"
   },
   "private": false,
   "publishConfig": {
